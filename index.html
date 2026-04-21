@@ -45,6 +45,9 @@
         #stack-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .modal-content { background: #222; padding: 25px; border-radius: 12px; width: 400px; text-align: center; }
         #stack-edit-list input { width: 100%; margin: 5px 0; padding: 8px; background: #111; color: white; border: 1px solid #444; border-radius: 5px; }
+        .busted { filter: grayscale(100%) }
+        .busted .p-amt { color: #999 !important; }
+        .busted .pos-tag { background: #555 !important; color: #ccc !important; }
     </style>
 </head>
 <body>
@@ -285,10 +288,10 @@
                 var posName = posFullMap[i];
                 var busted = players[i].stack <= 0;
 
-                html += '<div class="player-stack">' +
+                html += '<div class="player-stack ' + (busted ? 'busted' : '') + '">' +
                 '<div class="pos-tag ' + ((posName === "Dealer" || posName === "Dealer/SB") ? "dealer-color" : "") + '">' + posName + '</div>' +
-                '<div class="p-name-main" style="' + (busted ? 'opacity:0.45;' : '') + '">' + players[i].name + '</div>' +
-                '<div class="p-amt" style="' + (busted ? 'opacity:0.45;color:#999;' : '') + '">' + players[i].stack + '</div>' +
+                '<div class="p-name-main">' + players[i].name + '</div>' +
+                '<div class="p-amt">' + players[i].stack + '</div>' +
                 '</div>';
             }
 
