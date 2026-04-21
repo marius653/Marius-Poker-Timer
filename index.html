@@ -22,9 +22,8 @@
         .name-in { flex-grow: 1; background: #1a1a1a; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; }
         @media (max-width: 900px) { .setup-grid { flex-direction: column; } #setup-screen { width: 95%; } }
         #timer-screen { width: 100vw; height: 100vh; display: grid; grid-template-columns: 1fr 2fr 1fr; grid-template-rows: 2.5fr 0.6fr 0.4fr 0.7fr; align-items: center; padding: 20px; box-sizing: border-box; }
-        .center-wrap { position: relative; display: flex; align-items: center; justify-content: center; width: 34vw; height: 34vw; margin: 0 auto; }
-        .root{ --circle-scale: 1.4; }
-        #svg-container { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;transform: scale(var(--circle-scale));transform-origin: center; }
+        .center-wrap { position: relative; display: flex; align-items: center; justify-content: center; width: 45vw; height: 45vw; margin: 0 auto; }
+        #svg-container { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
         #timer { position: relative; z-index: 2; font-size: 9vw; font-weight: bold; font-family: monospace; text-align: center; line-height: 1; }
         .tit { font-size: 1.5vw; color: #888; text-transform: uppercase; text-align: center; }
         .val { font-size: 5vw; font-weight: bold; text-align: center; }
@@ -253,12 +252,29 @@
 
         function startApp() {
             updateLevelsFromTable();
+
             var stack = parseInt(document.getElementById('start-stack-input').value) || 2500;
             players = [];
-            for(var i=0; i<6; i++) { players.push({ name: document.getElementById('name-' + i).value, stack: stack }); }
-            currentLvlIdx = 0; setupLevel(); updateStackDisplay(); initSVG();
+
+            for (var i = 0; i < 6; i++) {
+                players.push({
+                    name: document.getElementById('name-' + i).value,
+                    stack: stack
+                });
+            }
+
+            currentLvlIdx = 0;
+            setupLevel();
+            updateStackDisplay();
+
             document.getElementById('setup-screen').classList.add('hidden');
             document.getElementById('timer-screen').classList.remove('hidden');
+
+            initSVG();
+            setTimeout(function() {
+                initSVG();
+                updateDisplay();
+            }, 50);
         }
 
         function setupLevel() {
@@ -348,7 +364,14 @@
         }
 
         window.updatePotRealtime = function(val) { document.getElementById("main-pot-display").innerText = "POT: " + val; };
-        
+
+        window.addEventListener("resize", function() {
+            if (!document.getElementById("timer-screen").classList.contains("hidden")) {
+                initSVG();
+                updateDisplay();
+            }
+        });
+                
         window.finalizeRound = function(st) {
             // Trekk hver spillers bidrag fra stacken
             players.forEach(function(p, i) {
@@ -471,19 +494,35 @@
 
         function initSVG() {
             var svg = document.getElementById("svg-container");
+            var timerEl = document.getElementById("timer");
+            var wrapEl = timerEl.parentElement;
+
             svg.innerHTML = "";
 
             var segments = 80;
 
-            var SCALE = 1.0; // 🔥 juster denne
+            var wrapRect = wrapEl.getBoundingClientRect();
+            var timerRect = timerEl.getBoundingClientRect();
 
-            var baseRadius = 80;
-            var baseWidth = 2.2;
-            var baseHeight = 10;
+            // Regn om timerstørrelsen til SVG viewBox (200 x 200)
+            var scaleX = 200 / wrapRect.width;
+            var scaleY = 200 / wrapRect.height;
 
-            var radius = baseRadius * SCALE;
-            var rectWidth = baseWidth * SCALE;
-            var rectHeight = baseHeight * SCALE;
+            var timerW = timerRect.width * scaleX;
+            var timerH = timerRect.height * scaleY;
+
+            // Avstand mellom timer og ring
+            var padding = 18;
+
+            // Ringradius basert på største halvakse
+            var radius = Math.max(timerW, timerH) / 2 + padding;
+
+            // Segmentstørrelse
+            var rectWidth = 2.2;
+            var rectHeight = 10;
+
+            // Sikkerhetsclamp så den ikke går utenfor viewBox
+            radius = Math.min(radius, 94 - rectHeight);
 
             for (var i = 0; i < segments; i++) {
                 var angleDeg = i * (360 / segments);
@@ -493,7 +532,6 @@
                 var y = 100 + radius * Math.sin(angleRad);
 
                 var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-
                 rect.setAttribute("x", x - rectWidth / 2);
                 rect.setAttribute("y", y - rectHeight / 2);
                 rect.setAttribute("width", rectWidth);
