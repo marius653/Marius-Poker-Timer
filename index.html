@@ -472,12 +472,12 @@
             var svg = document.getElementById("svg-container");
             svg.innerHTML = "";
 
-            for (var i = 0; i < 60; i++) {
-                var angle = (i * 6 - 90) * Math.PI / 180;
+            for (var i = 0; i < 120; i++) {
+                var angle = (i * 3 - 90) * Math.PI / 180;
                 var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
 
-                var x = 100 + 85 * Math.cos(angle);
-                var y = 100 + 85 * Math.sin(angle);
+                var x = 100 + 70 * Math.cos(angle);
+                var y = 100 + 70 * Math.sin(angle);
 
                 rect.setAttribute("x", x - 1.5);
                 rect.setAttribute("y", y - 6);
@@ -499,9 +499,9 @@
                 (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
 
             var total = tournamentLevels[currentLvlIdx].min * 60;
-            var filled = Math.floor(((total - timeLeft) / total) * 60);
+            var filled = Math.floor(((total - timeLeft) / total) * 120);
 
-            for (var i = 0; i < 60; i++) {
+            for (var i = 0; i < 120; i++) {
                 var el = document.getElementById("r-" + i);
                 if (el) {
                 el.setAttribute("fill", i < filled ? "#8b0000" : "#2a2a2a");
