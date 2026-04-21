@@ -172,14 +172,14 @@
                 var potSize = (level - prev) * contributors.length;
                 if (potSize <= 0) continue;
         
-                var winners = contributors.filter(p => p.isWinner);
-        
-                if (winners.length > 0) {
-                    var share = Math.floor(potSize / winners.length);
-        
-                    winners.forEach(w => {
-                        players[w.index].stack += share;
-                    });
+                var winners = sorted.filter(p => p.isWinner);
+                
+                var winner = winners.find(w => contributors.includes(w));
+                
+                if (winner) {
+                    players[winner.index].stack += potSize;
+                
+                    winner.isWinner = false;
                 }
         
                 prev = level;
