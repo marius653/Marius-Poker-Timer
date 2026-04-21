@@ -7,14 +7,19 @@
         :root { --setup-scale: 1.2; --chips-scale: 1.6; --pot-scale: 1.0; }
         body { background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('bakgrunn.png'); background-size: cover; background-position: center center; background-attachment: fixed; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
         .hidden { display: none !important; }
-        #setup-screen { width: 550px; margin: 20px auto; background: #222; padding: 15px; border-radius: 15px; text-align: center; transform: scale(var(--setup-scale)); transform-origin: top center; }
+        #setup-screen { width: 1100px; margin: 30px auto; background: #222; padding: 15px; border-radius: 15px; text-align: center; transform: scale(var(--setup-scale)); transform-origin: top center; }
         #setup-screen h2 { margin: 0 0 12px 0; }
-        .setup-grid { display: flex; gap: 20px; width: 100%; justify-content: center; align-items: flex-start; }
-        .setup-box { flex: 1; min-width: 350px; max-width: 500px; background: #222; padding: 20px; border-radius: 12px; }
+        .setup-grid { display: flex; gap: 25px; justify-content: center; align-items: flex-start; }
+        .setup-box { flex: 1; width: 500px; background: #222; padding: 20px; border-radius: 12px; }
+        .setup-box h3 { text-align: center; margin: 0 0 10px 0; }
+        .box-title { text-align: center; font-size: 20px; font-weight: bold; color: #ffcc00; margin-bottom: 10px; }
+        .box-subtitle { text-align: center; font-size: 12px; color: #aaa; margin-bottom: 10px; }
+        .start-wrapper { width: 100%; display: flex; justify-content: center; margin-top: 60px; }   
+        .start-wrapper button { width: 320px; padding: 18px; font-size: 22px; font-weight: bold; background: #2e7d32; color: white; border: none; border-radius: 10px; cursor: pointer; }
         .player-input-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; background: #333; padding: 10px; border-radius: 5px; }
         .pos-label { font-size: 11px; color: #ffcc00; font-weight: bold; width: 120px; text-align: left; text-transform: uppercase; }
         .name-in { flex-grow: 1; background: #1a1a1a; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; }
-        @media (max-width: 900px) {.setup-grid { flex-direction: column;}}
+        @media (max-width: 900px) { .setup-grid { flex-direction: column; } #setup-screen { width: 95%; } }
         #timer-screen { width: 100vw; height: 100vh; display: grid; grid-template-columns: 1fr 2fr 1fr; grid-template-rows: 2.5fr 0.6fr 0.4fr 0.7fr; align-items: center; padding: 20px; box-sizing: border-box; }
         #timer { font-size: 9vw; font-weight: bold; font-family: monospace; text-align: center; line-height: 1; }
         .tit { font-size: 1.5vw; color: #888; text-transform: uppercase; text-align: center; }
@@ -40,6 +45,7 @@
         <h2 style="color:#ffcc00">Poker Setup</h2>
         <div class="setup-grid">
             <div class="setup-box">
+                <div class="box-title">Spillere & Stack</div>
                 <div id="player-inputs"></div>
                 <div style="margin-top: 20px;">
                     Start Stack:
@@ -50,7 +56,8 @@
                 </button>
             </div>
             <div class="setup-box">
-                <h3 style="color:#ffcc00">Blind Levels</h3>
+                <div class="box-title">Blind Levels</div>
+                <div class="box-subtitle">Minutter og Big Blind</div>
                 <table id="levels-table">
                     <tbody></tbody>
                 </table>
