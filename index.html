@@ -41,6 +41,7 @@
         .pos-tag.dealer-color { background: #2e7d32; color: white; }
         .p-name-main { font-size: 1.4vw; color: #fff; margin-bottom: 2px; font-weight: 500; }
         .p-amt { font-size: 2.5vw; color: #ffcc00; font-weight: bold; }
+        .p-bb { font-size: 1.1vw; color: #bbb; margin-top: 4px; font-weight: 500; }
         .btn-blue { background: #1565c0; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; }
         .btn-gray { background: #303030; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; }
         .stack-edit-wrapper { grid-column: span 3; display: flex; justify-content: center; margin-top: 10px; position: relative; z-index: 5; }
@@ -50,6 +51,7 @@
         .busted { filter: grayscale(100%) }
         .busted .p-amt { color: #999 !important; }
         .busted .pos-tag { background: #555 !important; color: #ccc !important; }
+        .busted .p-bb { color: #777; }
     </style>
 </head>
 <body>
@@ -307,10 +309,14 @@
                 var posName = posFullMap[i];
                 var busted = players[i].stack <= 0;
 
+                var currentBB = tournamentLevels[currentLvlIdx] ? tournamentLevels[currentLvlIdx].bb : 1;
+                var bbCount = currentBB > 0 ? (players[i].stack / currentBB) : 0;
+
                 html += '<div class="player-stack ' + (busted ? 'busted' : '') + '">' +
                 '<div class="pos-tag ' + ((posName === "Dealer" || posName === "Dealer/SB") ? "dealer-color" : "") + '">' + posName + '</div>' +
                 '<div class="p-name-main">' + players[i].name + '</div>' +
                 '<div class="p-amt">' + players[i].stack + '</div>' +
+                '<div class="p-bb">' + bbCount.toFixed(1) + ' BB</div>' +
                 '</div>';
             }
 
