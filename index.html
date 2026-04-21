@@ -138,155 +138,34 @@
             });
         }
 
-        var players = [];
-        var dealerIndex = 3;
-        var currentLvlIdx = 0;
-        var timeLeft = 0;
-        var timerId = null;
-        var popupWindow = null;
-
-        function getAliveSeatIndexes() {
-            var alive = [];
-            for (var i = 0; i < players.length; i++) {
-                if ((players[i].stack || 0) > 0) alive.push(i);
+        var positionSets = {
+            full: {
+                6: ["Dealer", "Small blind", "Big blind", "UTG", "Hijack", "Cutoff"],
+                5: ["Dealer", "Small blind", "Big blind", "UTG", "Cutoff"],
+                4: ["Dealer", "Small blind", "Big blind", "UTG"],
+                3: ["Dealer", "Small blind", "Big blind"],
+                2: ["Dealer/SB", "Big blind"],
+                1: ["Vinner"]
+            },
+            short: {
+                6: ["D", "SB", "BB", "UTG", "HJ", "CO"],
+                5: ["D", "SB", "BB", "UTG", "CO"],
+                4: ["D", "SB", "BB", "UTG"],
+                3: ["D", "SB", "BB"],
+                2: ["D/SB", "BB"],
+                1: ["WIN"]
             }
-            return alive;
-        }
+        };
+        
+        var players = []; var dealerIndex = 3; var currentLvlIdx = 0; var timeLeft = 0; var timerId = null; var popupWindow = null;
 
-        function getNextAliveSeatIndex(fromIdx) {
-            if (!players.length) return -1;
-            for (var step = 1; step <= players.length; step++) {
-                var idx = (fromIdx + step) % players.length;
-                if ((players[idx].stack || 0) > 0) return idx;
-            }
-            return -1;
-        }
-
-        function normalizeDealerIndex() {
-            var alive = getAliveSeatIndexes();
-            if (!alive.length) return;
-
-            if (!players[dealerIndex] || (players[dealerIndex].stack || 0) <= 0) {
-                var next = getNextAliveSeatIndex(dealerIndex);
-                dealerIndex = next !== -1 ? next : alive[0];
-            }
-        }
-
-        function advanceDealerButton() {
-            var alive = getAliveSeatIndexes();
-            if (alive.length <= 1) return;
-            var next = getNextAliveSeatIndex(dealerIndex);
-            if (next !== -1) dealerIndex = next;
-        }
-
-        function getPositionTemplates(aliveCount) {
-            if (aliveCount >= 6) {
-                return {
-                    full: ["Dealer", "Small blind", "Big blind", "UTG", "Hijack", "Cutoff"],
-                    short: ["D", "SB", "BB", "UTG", "HJ", "CO"]
-                };
-            }
-            if (aliveCount === 5) {
-                return {
-                    full: ["Dealer", "Small blind", "Big blind", "UTG", "Cutoff"],
-                    short: ["D", "SB", "BB", "UTG", "CO"]
-                };
-            }
-            if (aliveCount === 4) {
-                return {
-                    full: ["Dealer", "Small blind", "Big blind", "UTG"],
-                    short: ["D", "SB", "BB", "UTG"]
-                };
-            }
-            if (aliveCount === 3) {
-                return {
-                    full: ["Dealer", "Small blind", "Big blind"],
-                    short: ["D", "SB", "BB"]
-                };
-            }
-            if (aliveCount === 2) {
-                return {
-                    full: ["Small blind", "Big blind"],
-                    short: ["SB", "BB"]
-                };
-            }
-
-            return {
-                full: ["Dealer"],
-                short: ["D"]
-            };
-        }
-
-        function getPositionMap() {
-            var map = [];
-            for (var i = 0; i < players.length; i++) {
-                map.push({
-                    index: i,
-                    full: "Slått ut",
-                    short: "OUT",
-                    active: false
-                });
-            }
-
-            var alive = getAliveSeatIndexes();
-            if (!alive.length) return map;
-
-            normalizeDealerIndex();
-
-            var templates = getPositionTemplates(alive.length);
-            var orderedAlive = [];
-
-            if (alive.length === 2) {
-                orderedAlive.push(dealerIndex);
-                var huOther = getNextAliveSeatIndex(dealerIndex);
-                if (huOther !== -1) orderedAlive.push(huOther);
-            } else {
-                orderedAlive.push(dealerIndex);
-                var cur = dealerIndex;
-                for (var n = 1; n < alive.length; n++) {
-                    cur = getNextAliveSeatIndex(cur);
-                    if (cur !== -1) orderedAlive.push(cur);
-                }
-            }
-
-            for (var j = 0; j < orderedAlive.length; j++) {
-                var seatIdx = orderedAlive[j];
-                map[seatIdx] = {
-                    index: seatIdx,
-                    full: templates.full[j] || "",
-                    short: templates.short[j] || "",
-                    active: true
-                };
-            }
-
-            return map;
-        }
-
-        var dragEl = null;
-        var startY = 0;
-        var initialTop = 0;
-
-        function handleDragStart(e, el) {
-            dragEl = el;
-            startY = e.clientY;
-            initialTop = parseInt(window.getComputedStyle(el).top) || 0;
-            document.onmousemove = handleDragMove;
-            document.onmouseup = handleDragEnd;
-        }
-
-        function handleDragMove(e) {
-            if (!dragEl) return;
-            dragEl.style.top = (initialTop + (e.clientY - startY)) + "px";
-        }
-
-        function handleDragEnd() {
-            dragEl = null;
-            document.onmousemove = null;
-            document.onmouseup = null;
-        }
+        var dragEl = null; var startY = 0; var initialTop = 0;
+        function handleDragStart(e, el) { dragEl = el; startY = e.clientY; initialTop = parseInt(window.getComputedStyle(el).top) || 0; document.onmousemove = handleDragMove; document.onmouseup = handleDragEnd; }
+        function handleDragMove(e) { if (!dragEl) return; dragEl.style.top = (initialTop + (e.clientY - startY)) + "px"; }
+        function handleDragEnd() { dragEl = null; document.onmousemove = null; document.onmouseup = null; }
 
         var inputCont = document.getElementById('player-inputs');
-        for (var i = 0; i < 6; i++) {
+        for(var i=0; i<6; i++) {
             var label = ["Under the gun", "Hijack", "Cutoff", "Button", "Small blind", "Big blind"][i];
             inputCont.innerHTML += '<div class="player-input-row"><span class="pos-label">' + label + '</span><input type="text" id="name-' + i + '" class="name-in" value="Spiller ' + (i+1) + '"></div>';
         }
@@ -310,24 +189,68 @@
             }
         }
 
+        function getActiveSeatIndexes() {
+            var arr = [];
+            for (var i = 0; i < players.length; i++) {
+                if ((players[i].stack || 0) > 0) arr.push(i);
+            }
+            return arr;
+            }
+
+            function isSeatActive(idx) {
+            return players[idx] && (players[idx].stack || 0) > 0;
+            }
+
+            function getNextActiveSeat(fromIdx) {
+            if (!players.length) return fromIdx;
+            for (var step = 1; step <= players.length; step++) {
+                var idx = (fromIdx + step) % players.length;
+                if (isSeatActive(idx)) return idx;
+            }
+            return fromIdx;
+            }
+
+            function normalizeDealerIndex() {
+            var active = getActiveSeatIndexes();
+            if (!active.length) return;
+            if (!isSeatActive(dealerIndex)) {
+                dealerIndex = getNextActiveSeat(dealerIndex);
+            }
+            }
+
+            function getOrderedActiveSeatsFromDealer() {
+            normalizeDealerIndex();
+            var ordered = [];
+            for (var step = 0; step < players.length; step++) {
+                var idx = (dealerIndex + step) % players.length;
+                if (isSeatActive(idx)) ordered.push(idx);
+            }
+            return ordered;
+            }
+
+            function getPositionMap(mode) {
+            var map = [];
+            var activeSeats = getOrderedActiveSeatsFromDealer();
+            var count = activeSeats.length;
+            var labels = positionSets[mode][count] || [];
+
+            for (var i = 0; i < players.length; i++) {
+                map[i] = mode === "short" ? "OUT" : "Slått ut";
+            }
+
+            for (var j = 0; j < activeSeats.length; j++) {
+                map[activeSeats[j]] = labels[j] || (mode === "short" ? "IN" : "I spill");
+            }
+
+            return map;
+            }
+
         function startApp() {
             updateLevelsFromTable();
             var stack = parseInt(document.getElementById('start-stack-input').value) || 2500;
             players = [];
-
-            for (var i = 0; i < 6; i++) {
-                players.push({
-                    name: document.getElementById('name-' + i).value,
-                    stack: stack
-                });
-            }
-
-            dealerIndex = 3;
-            normalizeDealerIndex();
-            currentLvlIdx = 0;
-            setupLevel();
-            updateStackDisplay();
-            initSVG();
+            for(var i=0; i<6; i++) { players.push({ name: document.getElementById('name-' + i).value, stack: stack }); }
+            currentLvlIdx = 0; setupLevel(); updateStackDisplay(); initSVG();
             document.getElementById('setup-screen').classList.add('hidden');
             document.getElementById('timer-screen').classList.remove('hidden');
         }
@@ -339,9 +262,7 @@
             var next = tournamentLevels[currentLvlIdx + 1];
             document.getElementById('next-val').innerText = next ? next.sb + "/" + next.bb : "--";
             updateDisplay();
-            if (popupWindow && !popupWindow.closed) {
-                popupWindow.updateBlinds(data.sb, data.bb);
-            }
+            if(popupWindow && !popupWindow.closed) { popupWindow.updateBlinds(data.sb, data.bb); }
         }
 
         function manualLevelChange(dir) {
@@ -349,22 +270,26 @@
             if (target >= 0 && target < tournamentLevels.length) {
                 currentLvlIdx = target;
                 setupLevel();
+                if(timerId) new Audio('https://google.com').play();
             }
         }
 
         function updateStackDisplay() {
-            var posMap = getPositionMap();
+            normalizeDealerIndex();
+
+            var posFullMap = getPositionMap("full");
+            var posShortMap = getPositionMap("short");
+
             var html = "";
-
             for (var i = 0; i < players.length; i++) {
-                var posName = posMap[i].full;
-                var extraStyle = players[i].stack <= 0 ? 'opacity:0.35;' : '';
+                var posName = posFullMap[i];
+                var busted = players[i].stack <= 0;
 
-                html += '<div class="player-stack" style="' + extraStyle + '">' +
-                    '<div class="pos-tag ' + (posName === "Dealer" ? "dealer-color" : "") + '">' + posName + '</div>' +
-                    '<div class="p-name-main">' + players[i].name + '</div>' +
-                    '<div class="p-amt">' + players[i].stack + '</div>' +
-                    '</div>';
+                html += '<div class="player-stack">' +
+                '<div class="pos-tag ' + ((posName === "Dealer" || posName === "Dealer/SB") ? "dealer-color" : "") + '">' + posName + '</div>' +
+                '<div class="p-name-main" style="' + (busted ? 'opacity:0.45;' : '') + '">' + players[i].name + '</div>' +
+                '<div class="p-amt" style="' + (busted ? 'opacity:0.45;color:#999;' : '') + '">' + players[i].stack + '</div>' +
+                '</div>';
             }
 
             document.getElementById('stacks-display').innerHTML = html;
@@ -372,170 +297,58 @@
             if (popupWindow && !popupWindow.closed) {
                 var data = tournamentLevels[currentLvlIdx];
                 var list = players.map(function(p, idx) {
-                    return {
-                        name: p.name,
-                        pos: posMap[idx].short,
-                        posFull: posMap[idx].full,
-                        stack: p.stack,
-                        busted: p.stack <= 0
-                    };
+                return {
+                    name: p.name,
+                    pos: posShortMap[idx],
+                    stack: p.stack,
+                    active: p.stack > 0
+                };
                 });
-
                 popupWindow.updateData(list, data.sb, data.bb);
             }
         }
 
         function openExternalWizard() {
-            if (popupWindow && !popupWindow.closed) {
-                popupWindow.focus();
-                return;
-            }
-
+            if (popupWindow && !popupWindow.closed) { popupWindow.focus(); return; }
             popupWindow = window.open("", "PokerWizardV54", "width=1000,height=850,resizable=yes,scrollbars=yes");
-
             var data = tournamentLevels[currentLvlIdx];
-            var posMap = getPositionMap();
+            var posShortMap = getPositionMap("short");
             var pList = players.map(function(p, i) {
                 return {
                     name: p.name,
-                    pos: posMap[i].short,
-                    posFull: posMap[i].full,
+                    pos: posShortMap[i],
                     stack: p.stack,
-                    busted: p.stack <= 0
+                    active: p.stack > 0
                 };
             });
 
             var content = '<html><head><title>Runde</title><style>body{background:#1a1a1a;color:white;font-family:sans-serif;padding:20px;user-select:none;}.header{font-size:40px;color:#ffcc00;text-align:center;font-weight:bold;margin-bottom:20px;text-transform:uppercase;}.row{display:grid;grid-template-columns:220px 1fr 150px;align-items:center;gap:20px;background:#262626;padding:15px;margin-bottom:10px;border-radius:10px;}.chips{display:flex;gap:12px;justify-content:center;}.chip-wrap{position:relative;}.chip{width:65px;height:65px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;border:3px dashed rgba(255,255,255,0.2);cursor:pointer;}.c10{background:#eee;color:#111;}.c20{background:#a00;color:#fff;}.c50{background:#060;color:#fff;}.c100{background:#006;color:#fff;}.c500{background:#111;color:#fff;border-color:#444;}.count{position:absolute;top:-10px;right:-5px;background:#ffcc00;color:#000;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;border:2px solid:#1a1a1a;}.val{font-size:32px;font-weight:bold;color:#ffcc00;text-align:right;}.nav{display:flex;justify-content:space-between;align-items:center;margin-top:30px;}button{padding:18px 40px;border-radius:10px;border:none;cursor:pointer;font-weight:bold;font-size:20px;color:white;}</style></head><body><div id="ui"></div><script>' +
             'var state = []; var stepIdx = 0; var curSB = 0; var curBB = 0; var chipVals = [10, 20, 50, 100, 500];' +
-
-            'function addForcedBlindChips(stepChips, amount) {' +
-            '    var remaining = amount;' +
-            '    var vals = [500, 100, 50, 20, 10];' +
-            '    vals.forEach(function(v) {' +
-            '        while (remaining >= v) {' +
-            '            stepChips[v]++;' +
-            '            remaining -= v;' +
-            '        }' +
-            '    });' +
-            '}' +
-
             'window.updateBlinds = function(sb, bb) { curSB = sb; curBB = bb; if(stepIdx === 0) resetRound(); };' +
-
-            'window.updateData = function(list, sb, bb) {' +
-            '    curSB = sb; curBB = bb;' +
-            '    state = list.map(function(p){ return {name:p.name, pos:p.pos, posFull:p.posFull || p.pos, stack:p.stack || 0, busted:!!p.busted, roundBet:0, stepBet:0, isWinner:false, stepChips:{10:0,20:0,50:0,100:0,500:0}}; });' +
-            '    resetRound();' +
-            '};' +
-
-            'function resetRound() {' +
-            '    stepIdx = 0;' +
-            '    state.forEach(function(p){' +
-            '        p.roundBet = 0;' +
-            '        p.stepBet = 0;' +
-            '        p.isWinner = false;' +
-            '        p.stepChips = {10:0,20:0,50:0,100:0,500:0};' +
-            '        if (p.busted) return;' +
-            '        if (p.pos === "SB") {' +
-            '            var sbAmount = Math.min(curSB, p.stack);' +
-            '            p.roundBet = sbAmount;' +
-            '            p.stepBet = sbAmount;' +
-            '            addForcedBlindChips(p.stepChips, sbAmount);' +
-            '        }' +
-            '        if (p.pos === "BB") {' +
-            '            var bbAmount = Math.min(curBB, p.stack);' +
-            '            p.roundBet = bbAmount;' +
-            '            p.stepBet = bbAmount;' +
-            '            addForcedBlindChips(p.stepChips, bbAmount);' +
-            '        }' +
-            '    });' +
-            '    render();' +
-            '}' +
-
-            'window.doAdd = function(i, v) {' +
-            '    var p = state[i];' +
-            '    if (p.busted) return;' +
-            '    var remaining = p.stack - p.roundBet;' +
-            '    if (remaining <= 0) return;' +
-            '    var addAmount = Math.min(v, remaining);' +
-            '    p.stepBet += addAmount;' +
-            '    p.roundBet += addAmount;' +
-            '    p.stepChips[v]++;' +
-            '    render();' +
-            '};' +
-
-            'window.doRem = function(e, i, v) {' +
-            '    e.preventDefault();' +
-            '    var p = state[i];' +
-            '    if (p.busted) return false;' +
-            '    if (state[i].stepChips[v] > 0) {' +
-            '        state[i].stepBet -= v;' +
-            '        state[i].roundBet -= v;' +
-            '        state[i].stepChips[v]--;' +
-            '        render();' +
-            '    }' +
-            '    return false;' +
-            '};' +
-
-            'window.doStep = function(dir) {' +
-            '    if (stepIdx === 4 && dir === 1) { window.opener.finalizeRound(state); resetRound(); return; }' +
-            '    if (stepIdx === 0 && dir === -1) return;' +
-            '    stepIdx += dir;' +
-            '    state.forEach(function(p){ p.stepBet = 0; p.stepChips = {10:0,20:0,50:0,100:0,500:0}; });' +
-            '    render();' +
-            '};' +
-
-            'function render() {' +
-            '    var pot = 0; state.forEach(function(p){ pot += p.roundBet; });' +
-            '    if(window.opener) window.opener.updatePotRealtime(pot);' +
-            '    var h = "<div class=\\'header\\'>" + ["PREFLOP", "FLOP", "TURN", "RIVER", "VELG VINNER"][stepIdx] + "</div>";' +
-            '    state.forEach(function(p, i) {' +
-            '        if(stepIdx < 4) {' +
-            '            if (p.busted) {' +
-            '                h += "<div class=\\'row\\' style=\\'opacity:0.35\\'><div><b style=\\'color:#ff5252\\'>[OUT]</b> " + p.name + "</div><div></div><div class=\\'val\\'>0</div></div>";' +
-            '            } else {' +
-            '                h += "<div class=\\'row\\'><div><b style=\\'color:#ffcc00\\'>[" + p.pos + "]</b> " + p.name + "</div><div class=\\'chips\\'>";' +
-            '                chipVals.forEach(function(v) {' +
-            '                    h += "<div class=\\'chip-wrap\\'>" + (p.stepChips[v] > 0 ? "<div class=\\'count\\'>" + p.stepChips[v] + "</div>" : "") + "<div class=\\'chip c" + v + "\\' onclick=\\'doAdd(" + i + "," + v + ")\\' oncontextmenu=\\'return doRem(event," + i + "," + v + ")\\'>" + v + "</div></div>";' +
-            '                });' +
-            '                h += "</div><div class=\\'val\\'>" + p.stepBet + "</div></div>";' +
-            '            }' +
-            '        } else {' +
-            '            if (p.busted) {' +
-            '                h += "<div class=\\'row\\' style=\\'opacity:0.35\\'><div><b style=\\'font-size:24px\\'>" + p.name + "</b></div><div></div><div style=\\'text-align:right;color:#ff5252;font-weight:bold\\'>SLÅTT UT</div></div>";' +
-            '            } else {' +
-            '                h += "<div class=\\'row\\'><div><b style=\\'font-size:24px\\'>[" + p.pos + "] " + p.name + "</b></div><div></div><div style=\\'text-align:right\\'>VINNER? <input type=\\'checkbox\\' style=\\'width:35px;height:35px\\' " + (p.isWinner ? "checked" : "") + " onchange=\\'state[" + i + "].isWinner=this.checked\\'></div></div>";' +
-            '            }' +
-            '        }' +
-            '    });' +
-            '    h += "<div class=\\'nav\\'><button style=\\'background:#444\\' onclick=\\'doStep(-1)\\'>TILBAKE</button><div style=\\'font-size:45px; font-weight:bold; color:#ffcc00\\'>POTT: " + pot + "</div><button style=\\'background:" + (stepIdx < 4 ? "#1565c0" : "#c62828") + "\\' onclick=\\'doStep(1)\\'>" + (stepIdx < 4 ? "NESTE" : "AVSLUTT") + "</button></div>";' +
-            '    document.getElementById("ui").innerHTML = h;' +
-            '}' +
-
+            'window.updateData = function(list, sb, bb) { curSB = sb; curBB = bb; state = list.map(function(p){ return {name:p.name, pos:p.pos, stack:p.stack || 0, active: !!p.active, roundBet:0, stepBet:0, isWinner:false, stepChips:{10:0,20:0,50:0,100:0,500:0}}; }); resetRound(); };' +
+            'function resetRound() { stepIdx = 0; state.forEach(function(p){ p.roundBet = 0; p.stepBet = 0; p.isWinner = false; p.stepChips = {10:0,20:0,50:0,100:0,500:0}; if(!p.active) return; if(p.pos==="SB" || p.pos==="D/SB"){ p.roundBet=Math.min(curSB,p.stack); p.stepBet=Math.min(curSB,p.stack); p.stepChips[curSB]=(p.stepChips[curSB]||0)+1; } if(p.pos==="BB"){ p.roundBet=Math.min(curBB,p.stack); p.stepBet=Math.min(curBB,p.stack); p.stepChips[curBB]=(p.stepChips[curBB]||0)+1; } }); render(); }' +
+            'function assign(p, val) { }' +
+            'window.doAdd = function(i, v) { var p = state[i]; if(!p.active) return; var remaining = p.stack - p.roundBet; if (remaining <= 0) return; var addAmount = Math.min(v, remaining); p.stepBet += addAmount; p.roundBet += addAmount; p.stepChips[v]++; render(); };' +                
+            'window.doRem = function(e, i, v) { e.preventDefault(); if(state[i].stepChips[v]>0){ state[i].stepBet -= v; state[i].roundBet -= v; state[i].stepChips[v]--; render(); } return false; };' +
+            'window.doStep = function(dir) { if(stepIdx === 4 && dir === 1) { window.opener.finalizeRound(state); resetRound(); return; } if(stepIdx === 0 && dir === -1) return; stepIdx += dir; state.forEach(function(p){ p.stepBet = 0; p.stepChips = {10:0,20:0,50:0,100:0,500:0}; }); render(); };' +
+            'function render() { var pot = 0; state.forEach(function(p){ pot += p.roundBet; }); if(window.opener) window.opener.updatePotRealtime(pot); var h = "<div class=\'header\'>" + ["PREFLOP", "FLOP", "TURN", "RIVER", "VELG VINNER"][stepIdx] + "</div>";' +
+            'state.forEach(function(p, i) { if(stepIdx < 4) { if(!p.active){ h += "<div class=\'row\' style=\'opacity:0.4\'><div><b style=\'color:#999\'>[Slått ut]</b> "+p.name+"</div><div></div><div class=\'val\' style=\'color:#999\'>0</div></div>"; } else { h += "<div class=\'row\'><div><b style=\'color:#ffcc00\'>["+p.pos+"]</b> "+p.name+"</div><div class=\'chips\'>"; chipVals.forEach(function(v) { h += "<div class=\'chip-wrap\'>" + (p.stepChips[v]>0 ? "<div class=\'count\'>"+p.stepChips[v]+"</div>" : "") + "<div class=\'chip c"+v+"\' onclick=\'doAdd("+i+","+v+")\' oncontextmenu=\'return doRem(event,"+i+","+v+")\'>"+v+"</div></div>"; }); h += "</div><div class=\'val\'>"+p.stepBet+"</div></div>"; } }' +
+            'else { if(!p.active){ h += "<div class=\'row\' style=\'opacity:0.4\'><div><b style=\'font-size:24px\'>"+p.name+"</b></div><div></div><div style=\'text-align:right;color:#999\'>SLÅTT UT</div></div>"; } else { h += "<div class=\'row\'><div><b style=\'font-size:24px\'>"+p.name+"</b></div><div></div><div style=\'text-align:right\'>VINNER? <input type=\'checkbox\' style=\'width:35px;height:35px\' "+(p.isWinner?"checked":"")+" onchange=\'state["+i+"].isWinner=this.checked\'></div></div>"; } } });' +
+            'h += "<div class=\'nav\'><button style=\'background:#444\' onclick=\'doStep(-1)\'>TILBAKE</button><div style=\'font-size:45px; font-weight:bold; color:#ffcc00\'>POTT: "+pot+"</div><button style=\'background:"+(stepIdx<4?"#1565c0":"#c62828")+"\' onclick=\'doStep(1)\'>"+(stepIdx<4?"NESTE":"AVSLUTT")+"</button></div>"; document.getElementById("ui").innerHTML = h; }' +
             'window.updateData(' + JSON.stringify(pList) + ',' + data.sb + ',' + data.bb + ');' +
             '<\/script></body></html>';
-
             popupWindow.document.write(content);
             popupWindow.document.close();
         }
 
-        window.updatePotRealtime = function(val) {
-            document.getElementById("main-pot-display").innerText = "POT: " + val;
-        };
-
+        window.updatePotRealtime = function(val) { document.getElementById("main-pot-display").innerText = "POT: " + val; };
         window.finalizeRound = function(st) {
             players.forEach(function(p, i) {
                 p.stack -= st[i].roundBet;
-                if (p.stack < 0) p.stack = 0;
             });
 
-            var sorted = st.map(function(p, i) {
-                var copy = {};
-                for (var k in p) copy[k] = p[k];
-                copy.index = i;
-                return copy;
-            }).sort(function(a, b) {
-                return a.roundBet - b.roundBet;
-            });
+            var sorted = st.map((p, i) => ({...p, index: i}))
+                   .sort((a,b) => a.roundBet - b.roundBet);
 
             var prev = 0;
         
@@ -546,96 +359,63 @@
                 var potSize = (level - prev) * contributors.length;
                 if (potSize <= 0) continue;
         
-                var winners = sorted.filter(function(p) { return p.isWinner; });
+                var winners = sorted.filter(p => p.isWinner);
                 
-                var winner = winners.find(function(w) {
-                    return contributors.some(function(c) { return c.index === w.index; });
-                });
+                var winner = winners.find(w => contributors.includes(w));
                 
                 if (winner) {
                     players[winner.index].stack += potSize;
+                
                     winner.isWinner = false;
                 }
         
                 prev = level;
             }
             
-            advanceDealerButton();
+            normalizeDealerIndex();
+            dealerIndex = getNextActiveSeat(dealerIndex);
+            normalizeDealerIndex();
+
             updateStackDisplay();
             document.getElementById("main-pot-display").innerText = "POT: 0";
 
             if (popupWindow && !popupWindow.closed) {
                 var data = tournamentLevels[currentLvlIdx];
-                var posMap = getPositionMap();
-                var list = players.map(function(p, idx){ 
-                    return { 
-                        name: p.name,
-                        pos: posMap[idx].short,
-                        posFull: posMap[idx].full,
-                        stack: p.stack,
-                        busted: p.stack <= 0
-                    }; 
+                var posShortMap = getPositionMap("short");
+                var list = players.map(function(p, idx){
+                    return {
+                    name: p.name,
+                    pos: posShortMap[idx],
+                    stack: p.stack,
+                    active: p.stack > 0
+                    };
                 });
-            
                 popupWindow.updateData(list, data.sb, data.bb);
             }
         };
 
         function initSVG() {
-            var svg = document.getElementById("svg-container");
-            svg.innerHTML = "";
+            var svg = document.getElementById("svg-container"); svg.innerHTML = "";
             for (var i = 0; i < 60; i++) {
                 var angle = (i * 6 - 90) * Math.PI / 180;
-                var r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                var x = 100 + 85 * Math.cos(angle);
-                var y = 100 + 85 * Math.sin(angle);
-                r.setAttribute("x", x - 1.5);
-                r.setAttribute("y", y - 5);
-                r.setAttribute("width", "3");
-                r.setAttribute("height", "12");
-                r.setAttribute("fill", "#2a2a2a");
-                r.setAttribute("transform", "rotate(" + (i * 6) + "," + x + "," + y + ")");
-                r.setAttribute("id", "r-" + i);
-                svg.appendChild(r);
+                var r = document.createElementNS("http://w3.org", "rect");
+                var x = 100 + 85 * Math.cos(angle); var y = 100 + 85 * Math.sin(angle);
+                r.setAttribute("x", x-1.5); r.setAttribute("y", y-5); r.setAttribute("width", "3"); r.setAttribute("height", "12");
+                r.setAttribute("fill", "#2a2a2a"); r.setAttribute("transform", "rotate(" + (i*6) + "," + x + "," + y + ")");
+                r.setAttribute("id", "r-" + i); svg.appendChild(r);
             }
         }
-
         function updateDisplay() {
-            var m = Math.floor(timeLeft / 60);
-            var s = timeLeft % 60;
-            document.getElementById("timer").innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+            var m = Math.floor(timeLeft / 60); var s = timeLeft % 60;
+            document.getElementById("timer").innerText = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
             var total = tournamentLevels[currentLvlIdx].min * 60;
             var f = Math.floor(((total - timeLeft) / total) * 60);
-            for (var i = 0; i < 60; i++) {
-                var el = document.getElementById("r-" + i);
-                if (el) el.setAttribute("fill", i < f ? "#8b0000" : "#2a2a2a");
-            }
+            for(var i=0; i<60; i++) { var el = document.getElementById("r-" + i); if(el) el.setAttribute("fill", i < f ? "#8b0000" : "#2a2a2a"); }
         }
-
         function toggleTimer() {
             var b = document.getElementById("startBtn");
-            if (timerId) {
-                clearInterval(timerId);
-                timerId = null;
-                b.innerText = "START";
-            } else {
-                b.innerText = "PAUSE";
-                timerId = setInterval(function() {
-                    if (timeLeft > 0) {
-                        timeLeft--;
-                        updateDisplay();
-                    } else {
-                        currentLvlIdx++;
-                        if (currentLvlIdx < tournamentLevels.length) {
-                            setupLevel();
-                        } else {
-                            clearInterval(timerId);
-                            timerId = null;
-                            b.innerText = "START";
-                        }
-                    }
-                }, 1000);
-            }
+            if (timerId) { clearInterval(timerId); timerId = null; b.innerText = "START"; }
+            else { b.innerText = "PAUSE"; timerId = setInterval(function() { if (timeLeft > 0) { timeLeft--; updateDisplay(); } else { currentLvlIdx++; if(currentLvlIdx < tournamentLevels.length) { setupLevel(); new Audio("https://google.com").play(); } } }, 1000); }
         }
 
         function openStackEditor() {
@@ -648,9 +428,9 @@
             document.getElementById("stack-modal").classList.remove("hidden");
         }
 
-        function closeStackEditor() {
+         function closeStackEditor() {
             document.getElementById("stack-modal").classList.add("hidden");
-        }
+        }   
 
         function saveStacks() {
             for (var i = 0; i < players.length; i++) {
@@ -669,6 +449,7 @@
                 row.querySelector(".sb-cell").innerText = Math.floor(bb / 2);
             }
         });
+
     </script>
 </body>
 </html>
