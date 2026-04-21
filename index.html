@@ -139,7 +139,7 @@
         }
 
         var players = [];
-        var dealerIndex = 3; // seat index i players-arrayen
+        var dealerIndex = 3;
         var currentLvlIdx = 0;
         var timeLeft = 0;
         var timerId = null;
@@ -155,7 +155,6 @@
 
         function getNextAliveSeatIndex(fromIdx) {
             if (!players.length) return -1;
-
             for (var step = 1; step <= players.length; step++) {
                 var idx = (fromIdx + step) % players.length;
                 if ((players[idx].stack || 0) > 0) return idx;
@@ -169,15 +168,13 @@
 
             if (!players[dealerIndex] || (players[dealerIndex].stack || 0) <= 0) {
                 var next = getNextAliveSeatIndex(dealerIndex);
-                if (next !== -1) dealerIndex = next;
-                else dealerIndex = alive[0];
+                dealerIndex = next !== -1 ? next : alive[0];
             }
         }
 
         function advanceDealerButton() {
             var alive = getAliveSeatIndexes();
             if (alive.length <= 1) return;
-
             var next = getNextAliveSeatIndex(dealerIndex);
             if (next !== -1) dealerIndex = next;
         }
@@ -245,7 +242,6 @@
                 if (huOther !== -1) orderedAlive.push(huOther);
             } else {
                 orderedAlive.push(dealerIndex);
-
                 var cur = dealerIndex;
                 for (var n = 1; n < alive.length; n++) {
                     cur = getNextAliveSeatIndex(cur);
@@ -266,13 +262,31 @@
             return map;
         }
 
-        var dragEl = null; var startY = 0; var initialTop = 0;
-        function handleDragStart(e, el) { dragEl = el; startY = e.clientY; initialTop = parseInt(window.getComputedStyle(el).top) || 0; document.onmousemove = handleDragMove; document.onmouseup = handleDragEnd; }
-        function handleDragMove(e) { if (!dragEl) return; dragEl.style.top = (initialTop + (e.clientY - startY)) + "px"; }
-        function handleDragEnd() { dragEl = null; document.onmousemove = null; document.onmouseup = null; }
+        var dragEl = null;
+        var startY = 0;
+        var initialTop = 0;
+
+        function handleDragStart(e, el) {
+            dragEl = el;
+            startY = e.clientY;
+            initialTop = parseInt(window.getComputedStyle(el).top) || 0;
+            document.onmousemove = handleDragMove;
+            document.onmouseup = handleDragEnd;
+        }
+
+        function handleDragMove(e) {
+            if (!dragEl) return;
+            dragEl.style.top = (initialTop + (e.clientY - startY)) + "px";
+        }
+
+        function handleDragEnd() {
+            dragEl = null;
+            document.onmousemove = null;
+            document.onmouseup = null;
+        }
 
         var inputCont = document.getElementById('player-inputs');
-        for(var i=0; i<6; i++) {
+        for (var i = 0; i < 6; i++) {
             var label = ["Under the gun", "Hijack", "Cutoff", "Button", "Small blind", "Big blind"][i];
             inputCont.innerHTML += '<div class="player-input-row"><span class="pos-label">' + label + '</span><input type="text" id="name-' + i + '" class="name-in" value="Spiller ' + (i+1) + '"></div>';
         }
@@ -298,7 +312,6 @@
 
         function startApp() {
             updateLevelsFromTable();
-
             var stack = parseInt(document.getElementById('start-stack-input').value) || 2500;
             players = [];
 
@@ -311,12 +324,10 @@
 
             dealerIndex = 3;
             normalizeDealerIndex();
-
             currentLvlIdx = 0;
             setupLevel();
             updateStackDisplay();
             initSVG();
-
             document.getElementById('setup-screen').classList.add('hidden');
             document.getElementById('timer-screen').classList.remove('hidden');
         }
@@ -328,7 +339,9 @@
             var next = tournamentLevels[currentLvlIdx + 1];
             document.getElementById('next-val').innerText = next ? next.sb + "/" + next.bb : "--";
             updateDisplay();
-            if(popupWindow && !popupWindow.closed) { popupWindow.updateBlinds(data.sb, data.bb); }
+            if (popupWindow && !popupWindow.closed) {
+                popupWindow.updateBlinds(data.sb, data.bb);
+            }
         }
 
         function manualLevelChange(dir) {
@@ -373,7 +386,10 @@
         }
 
         function openExternalWizard() {
-            if (popupWindow && !popupWindow.closed) { popupWindow.focus(); return; }
+            if (popupWindow && !popupWindow.closed) {
+                popupWindow.focus();
+                return;
+            }
 
             popupWindow = window.open("", "PokerWizardV54", "width=1000,height=850,resizable=yes,scrollbars=yes");
 
@@ -391,24 +407,26 @@
 
             var content = '<html><head><title>Runde</title><style>body{background:#1a1a1a;color:white;font-family:sans-serif;padding:20px;user-select:none;}.header{font-size:40px;color:#ffcc00;text-align:center;font-weight:bold;margin-bottom:20px;text-transform:uppercase;}.row{display:grid;grid-template-columns:220px 1fr 150px;align-items:center;gap:20px;background:#262626;padding:15px;margin-bottom:10px;border-radius:10px;}.chips{display:flex;gap:12px;justify-content:center;}.chip-wrap{position:relative;}.chip{width:65px;height:65px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;border:3px dashed rgba(255,255,255,0.2);cursor:pointer;}.c10{background:#eee;color:#111;}.c20{background:#a00;color:#fff;}.c50{background:#060;color:#fff;}.c100{background:#006;color:#fff;}.c500{background:#111;color:#fff;border-color:#444;}.count{position:absolute;top:-10px;right:-5px;background:#ffcc00;color:#000;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;border:2px solid:#1a1a1a;}.val{font-size:32px;font-weight:bold;color:#ffcc00;text-align:right;}.nav{display:flex;justify-content:space-between;align-items:center;margin-top:30px;}button{padding:18px 40px;border-radius:10px;border:none;cursor:pointer;font-weight:bold;font-size:20px;color:white;}</style></head><body><div id="ui"></div><script>' +
             'var state = []; var stepIdx = 0; var curSB = 0; var curBB = 0; var chipVals = [10, 20, 50, 100, 500];' +
+
+            'function addForcedBlindChips(stepChips, amount) {' +
+            '    var remaining = amount;' +
+            '    var vals = [500, 100, 50, 20, 10];' +
+            '    vals.forEach(function(v) {' +
+            '        while (remaining >= v) {' +
+            '            stepChips[v]++;' +
+            '            remaining -= v;' +
+            '        }' +
+            '    });' +
+            '}' +
+
             'window.updateBlinds = function(sb, bb) { curSB = sb; curBB = bb; if(stepIdx === 0) resetRound(); };' +
+
             'window.updateData = function(list, sb, bb) {' +
             '    curSB = sb; curBB = bb;' +
-            '    state = list.map(function(p){' +
-            '        return {' +
-            '            name: p.name,' +
-            '            pos: p.pos,' +
-            '            posFull: p.posFull || p.pos,' +
-            '            stack: p.stack || 0,' +
-            '            busted: !!p.busted,' +
-            '            roundBet: 0,' +
-            '            stepBet: 0,' +
-            '            isWinner: false,' +
-            '            stepChips: {10:0,20:0,50:0,100:0,500:0}' +
-            '        };' +
-            '    });' +
+            '    state = list.map(function(p){ return {name:p.name, pos:p.pos, posFull:p.posFull || p.pos, stack:p.stack || 0, busted:!!p.busted, roundBet:0, stepBet:0, isWinner:false, stepChips:{10:0,20:0,50:0,100:0,500:0}}; });' +
             '    resetRound();' +
             '};' +
+
             'function resetRound() {' +
             '    stepIdx = 0;' +
             '    state.forEach(function(p){' +
@@ -418,18 +436,21 @@
             '        p.stepChips = {10:0,20:0,50:0,100:0,500:0};' +
             '        if (p.busted) return;' +
             '        if (p.pos === "SB") {' +
-            '            p.roundBet = Math.min(curSB, p.stack);' +
-            '            p.stepBet = Math.min(curSB, p.stack);' +
-            '            if (curSB > 0 && p.stepChips.hasOwnProperty(curSB)) p.stepChips[curSB] = (p.stepChips[curSB] || 0) + 1;' +
+            '            var sbAmount = Math.min(curSB, p.stack);' +
+            '            p.roundBet = sbAmount;' +
+            '            p.stepBet = sbAmount;' +
+            '            addForcedBlindChips(p.stepChips, sbAmount);' +
             '        }' +
             '        if (p.pos === "BB") {' +
-            '            p.roundBet = Math.min(curBB, p.stack);' +
-            '            p.stepBet = Math.min(curBB, p.stack);' +
-            '            if (curBB > 0 && p.stepChips.hasOwnProperty(curBB)) p.stepChips[curBB] = (p.stepChips[curBB] || 0) + 1;' +
+            '            var bbAmount = Math.min(curBB, p.stack);' +
+            '            p.roundBet = bbAmount;' +
+            '            p.stepBet = bbAmount;' +
+            '            addForcedBlindChips(p.stepChips, bbAmount);' +
             '        }' +
             '    });' +
             '    render();' +
             '}' +
+
             'window.doAdd = function(i, v) {' +
             '    var p = state[i];' +
             '    if (p.busted) return;' +
@@ -441,33 +462,55 @@
             '    p.stepChips[v]++;' +
             '    render();' +
             '};' +
+
             'window.doRem = function(e, i, v) {' +
             '    e.preventDefault();' +
             '    var p = state[i];' +
             '    if (p.busted) return false;' +
-            '    if(state[i].stepChips[v]>0){ state[i].stepBet -= v; state[i].roundBet -= v; state[i].stepChips[v]--; render(); } return false;' +
+            '    if (state[i].stepChips[v] > 0) {' +
+            '        state[i].stepBet -= v;' +
+            '        state[i].roundBet -= v;' +
+            '        state[i].stepChips[v]--;' +
+            '        render();' +
+            '    }' +
+            '    return false;' +
             '};' +
-            'window.doStep = function(dir) { if(stepIdx === 4 && dir === 1) { window.opener.finalizeRound(state); resetRound(); return; } if(stepIdx === 0 && dir === -1) return; stepIdx += dir; state.forEach(function(p){ p.stepBet = 0; p.stepChips = {10:0,20:0,50:0,100:0,500:0}; }); render(); };' +
-            'function render() { var pot = 0; state.forEach(function(p){ pot += p.roundBet; }); if(window.opener) window.opener.updatePotRealtime(pot); var h = "<div class=\\'header\\'>" + ["PREFLOP", "FLOP", "TURN", "RIVER", "VELG VINNER"][stepIdx] + "</div>";' +
-            'state.forEach(function(p, i) {' +
-            'if(stepIdx < 4) {' +
-            '   if (p.busted) {' +
-            '       h += "<div class=\\'row\\' style=\\'opacity:0.35\\'><div><b style=\\'color:#ff5252\\'>[OUT]</b> " + p.name + "</div><div></div><div class=\\'val\\'>0</div></div>";' +
-            '   } else {' +
-            '       h += "<div class=\\'row\\'><div><b style=\\'color:#ffcc00\\'>[" + p.pos + "]</b> " + p.name + "</div><div class=\\'chips\\'>";' +
-            '       chipVals.forEach(function(v) { h += "<div class=\\'chip-wrap\\'>" + (p.stepChips[v]>0 ? "<div class=\\'count\\'>"+p.stepChips[v]+"</div>" : "") + "<div class=\\'chip c"+v+"\\' onclick=\\'doAdd("+i+","+v+")\\' oncontextmenu=\\'return doRem(event,"+i+","+v+")\\'>"+v+"</div></div>"; });' +
-            '       h += "</div><div class=\\'val\\'>"+p.stepBet+"</div></div>";' +
-            '   }' +
+
+            'window.doStep = function(dir) {' +
+            '    if (stepIdx === 4 && dir === 1) { window.opener.finalizeRound(state); resetRound(); return; }' +
+            '    if (stepIdx === 0 && dir === -1) return;' +
+            '    stepIdx += dir;' +
+            '    state.forEach(function(p){ p.stepBet = 0; p.stepChips = {10:0,20:0,50:0,100:0,500:0}; });' +
+            '    render();' +
+            '};' +
+
+            'function render() {' +
+            '    var pot = 0; state.forEach(function(p){ pot += p.roundBet; });' +
+            '    if(window.opener) window.opener.updatePotRealtime(pot);' +
+            '    var h = "<div class=\\'header\\'>" + ["PREFLOP", "FLOP", "TURN", "RIVER", "VELG VINNER"][stepIdx] + "</div>";' +
+            '    state.forEach(function(p, i) {' +
+            '        if(stepIdx < 4) {' +
+            '            if (p.busted) {' +
+            '                h += "<div class=\\'row\\' style=\\'opacity:0.35\\'><div><b style=\\'color:#ff5252\\'>[OUT]</b> " + p.name + "</div><div></div><div class=\\'val\\'>0</div></div>";' +
+            '            } else {' +
+            '                h += "<div class=\\'row\\'><div><b style=\\'color:#ffcc00\\'>[" + p.pos + "]</b> " + p.name + "</div><div class=\\'chips\\'>";' +
+            '                chipVals.forEach(function(v) {' +
+            '                    h += "<div class=\\'chip-wrap\\'>" + (p.stepChips[v] > 0 ? "<div class=\\'count\\'>" + p.stepChips[v] + "</div>" : "") + "<div class=\\'chip c" + v + "\\' onclick=\\'doAdd(" + i + "," + v + ")\\' oncontextmenu=\\'return doRem(event," + i + "," + v + ")\\'>" + v + "</div></div>";' +
+            '                });' +
+            '                h += "</div><div class=\\'val\\'>" + p.stepBet + "</div></div>";' +
+            '            }' +
+            '        } else {' +
+            '            if (p.busted) {' +
+            '                h += "<div class=\\'row\\' style=\\'opacity:0.35\\'><div><b style=\\'font-size:24px\\'>" + p.name + "</b></div><div></div><div style=\\'text-align:right;color:#ff5252;font-weight:bold\\'>SLÅTT UT</div></div>";' +
+            '            } else {' +
+            '                h += "<div class=\\'row\\'><div><b style=\\'font-size:24px\\'>[" + p.pos + "] " + p.name + "</b></div><div></div><div style=\\'text-align:right\\'>VINNER? <input type=\\'checkbox\\' style=\\'width:35px;height:35px\\' " + (p.isWinner ? "checked" : "") + " onchange=\\'state[" + i + "].isWinner=this.checked\\'></div></div>";' +
+            '            }' +
+            '        }' +
+            '    });' +
+            '    h += "<div class=\\'nav\\'><button style=\\'background:#444\\' onclick=\\'doStep(-1)\\'>TILBAKE</button><div style=\\'font-size:45px; font-weight:bold; color:#ffcc00\\'>POTT: " + pot + "</div><button style=\\'background:" + (stepIdx < 4 ? "#1565c0" : "#c62828") + "\\' onclick=\\'doStep(1)\\'>" + (stepIdx < 4 ? "NESTE" : "AVSLUTT") + "</button></div>";' +
+            '    document.getElementById("ui").innerHTML = h;' +
             '}' +
-            'else {' +
-            '   if (p.busted) {' +
-            '       h += "<div class=\\'row\\' style=\\'opacity:0.35\\'><div><b style=\\'font-size:24px\\'>"+p.name+"</b></div><div></div><div style=\\'text-align:right;color:#ff5252;font-weight:bold\\'>SLÅTT UT</div></div>";' +
-            '   } else {' +
-            '       h += "<div class=\\'row\\'><div><b style=\\'font-size:24px\\'>[" + p.pos + "] " + p.name + "</b></div><div></div><div style=\\'text-align:right\\'>VINNER? <input type=\\'checkbox\\' style=\\'width:35px;height:35px\\' "+(p.isWinner?"checked":"")+" onchange=\\'state["+i+"].isWinner=this.checked\\'></div></div>";' +
-            '   }' +
-            '}' +
-            '});' +
-            'h += "<div class=\\'nav\\'><button style=\\'background:#444\\' onclick=\\'doStep(-1)\\'>TILBAKE</button><div style=\\'font-size:45px; font-weight:bold; color:#ffcc00\\'>POTT: "+pot+"</div><button style=\\'background:"+(stepIdx<4?"#1565c0":"#c62828")+"\\' onclick=\\'doStep(1)\\'>"+(stepIdx<4?"NESTE":"AVSLUTT")+"</button></div>"; document.getElementById("ui").innerHTML = h; }' +
+
             'window.updateData(' + JSON.stringify(pList) + ',' + data.sb + ',' + data.bb + ');' +
             '<\/script></body></html>';
 
@@ -475,7 +518,9 @@
             popupWindow.document.close();
         }
 
-        window.updatePotRealtime = function(val) { document.getElementById("main-pot-display").innerText = "POT: " + val; };
+        window.updatePotRealtime = function(val) {
+            document.getElementById("main-pot-display").innerText = "POT: " + val;
+        };
 
         window.finalizeRound = function(st) {
             players.forEach(function(p, i) {
@@ -488,7 +533,7 @@
                 for (var k in p) copy[k] = p[k];
                 copy.index = i;
                 return copy;
-            }).sort(function(a,b) {
+            }).sort(function(a, b) {
                 return a.roundBet - b.roundBet;
             });
 
@@ -514,7 +559,7 @@
         
                 prev = level;
             }
-
+            
             advanceDealerButton();
             updateStackDisplay();
             document.getElementById("main-pot-display").innerText = "POT: 0";
@@ -537,23 +582,34 @@
         };
 
         function initSVG() {
-            var svg = document.getElementById("svg-container"); svg.innerHTML = "";
+            var svg = document.getElementById("svg-container");
+            svg.innerHTML = "";
             for (var i = 0; i < 60; i++) {
                 var angle = (i * 6 - 90) * Math.PI / 180;
                 var r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                var x = 100 + 85 * Math.cos(angle); var y = 100 + 85 * Math.sin(angle);
-                r.setAttribute("x", x-1.5); r.setAttribute("y", y-5); r.setAttribute("width", "3"); r.setAttribute("height", "12");
-                r.setAttribute("fill", "#2a2a2a"); r.setAttribute("transform", "rotate(" + (i*6) + "," + x + "," + y + ")");
-                r.setAttribute("id", "r-" + i); svg.appendChild(r);
+                var x = 100 + 85 * Math.cos(angle);
+                var y = 100 + 85 * Math.sin(angle);
+                r.setAttribute("x", x - 1.5);
+                r.setAttribute("y", y - 5);
+                r.setAttribute("width", "3");
+                r.setAttribute("height", "12");
+                r.setAttribute("fill", "#2a2a2a");
+                r.setAttribute("transform", "rotate(" + (i * 6) + "," + x + "," + y + ")");
+                r.setAttribute("id", "r-" + i);
+                svg.appendChild(r);
             }
         }
 
         function updateDisplay() {
-            var m = Math.floor(timeLeft / 60); var s = timeLeft % 60;
-            document.getElementById("timer").innerText = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+            var m = Math.floor(timeLeft / 60);
+            var s = timeLeft % 60;
+            document.getElementById("timer").innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
             var total = tournamentLevels[currentLvlIdx].min * 60;
             var f = Math.floor(((total - timeLeft) / total) * 60);
-            for(var i=0; i<60; i++) { var el = document.getElementById("r-" + i); if(el) el.setAttribute("fill", i < f ? "#8b0000" : "#2a2a2a"); }
+            for (var i = 0; i < 60; i++) {
+                var el = document.getElementById("r-" + i);
+                if (el) el.setAttribute("fill", i < f ? "#8b0000" : "#2a2a2a");
+            }
         }
 
         function toggleTimer() {
@@ -570,7 +626,7 @@
                         updateDisplay();
                     } else {
                         currentLvlIdx++;
-                        if(currentLvlIdx < tournamentLevels.length) {
+                        if (currentLvlIdx < tournamentLevels.length) {
                             setupLevel();
                         } else {
                             clearInterval(timerId);
@@ -601,7 +657,6 @@
                 var val = parseInt(document.getElementById("stack-" + i).value) || 0;
                 players[i].stack = val;
             }
-
             normalizeDealerIndex();
             updateStackDisplay();
             closeStackEditor();
