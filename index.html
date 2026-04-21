@@ -345,53 +345,122 @@
         }
 
         window.updatePotRealtime = function(val) { document.getElementById("main-pot-display").innerText = "POT: " + val; };
+        
         window.finalizeRound = function(st) {
+            // Trekk hver spillers bidrag fra stacken
             players.forEach(function(p, i) {
-                p.stack -= st[i].roundBet;
+                p.stack -= (st[i].roundBet || 0);
             });
 
-            var sorted = st.map((p, i) => ({...p, index: i}))
-                   .sort((a,b) => a.roundBet - b.roundBet);
+            // Lag liste over spillere som faktisk har bidratt til potten
+            var involved = st
+                .map(function(p, i) {
+                return {
+                    index: i,
+                    name: p.name,
+                    roundBet: p.roundBet || 0,
+                    isWinner: !!p.isWinner
+                };
+                })
+                .filter(function(p) {
+                return p.roundBet > 0;
+                })
+                .sort(function(a, b) {
+                return a.roundBet - b.roundBet;
+                });
 
-            var prev = 0;
-        
-            for (var i = 0; i < sorted.length; i++) {
-                var level = sorted[i].roundBet;
-                var contributors = sorted.slice(i);
-        
-                var potSize = (level - prev) * contributors.length;
-                if (potSize <= 0) continue;
-        
-                var winners = sorted.filter(p => p.isWinner);
-                
-                var winner = winners.find(w => contributors.includes(w));
-                
-                if (winner) {
-                    players[winner.index].stack += potSize;
-                
-                    winner.isWinner = false;
+            // Hvis ingen har lagt noe i potten
+            if (!involved.length) {
+                normalizeDealerIndex();
+                dealerIndex = getNextActiveSeat(dealerIndex);
+                normalizeDealerIndex();
+                updateStackDisplay();
+                document.getElementById("main-pot-display").innerText = "POT: 0";
+
+                if (popupWindow && !popupWindow.closed) {
+                var dataEmpty = tournamentLevels[currentLvlIdx];
+                var posShortMapEmpty = getPositionMap("short");
+                var listEmpty = players.map(function(p, idx) {
+                    return {
+                    name: p.name,
+                    pos: posShortMapEmpty[idx],
+                    stack: p.stack,
+                    active: p.stack > 0
+                    };
+                });
+                popupWindow.updateData(listEmpty, dataEmpty.sb, dataEmpty.bb);
                 }
-        
-                prev = level;
+                return;
             }
-            
+
+            // Bygg main pot + sidepots
+            var pots = [];
+            var prevLevel = 0;
+
+            for (var i = 0; i < involved.length; i++) {
+                var level = involved[i].roundBet;
+
+                var contributors = involved.filter(function(p) {
+                return p.roundBet >= level;
+                });
+
+                var slice = level - prevLevel;
+                var potSize = slice * contributors.length;
+
+                if (potSize > 0) {
+                pots.push({
+                    size: potSize,
+                    eligible: contributors.map(function(p) {
+                    return p.index;
+                    })
+                });
+                }
+
+                prevLevel = level;
+            }
+
+            // Fordel hver pot til markerte vinnere som faktisk er eligible
+            pots.forEach(function(pot) {
+                var potWinners = st
+                .map(function(p, i) {
+                    return {
+                    index: i,
+                    isWinner: !!p.isWinner
+                    };
+                })
+                .filter(function(p) {
+                    return p.isWinner && pot.eligible.indexOf(p.index) !== -1;
+                });
+
+                if (!potWinners.length) return;
+
+                var share = Math.floor(pot.size / potWinners.length);
+                var remainder = pot.size % potWinners.length;
+
+                potWinners.forEach(function(w, idx) {
+                players[w.index].stack += share + (idx < remainder ? 1 : 0);
+                });
+            });
+
+            // Flytt dealer til neste aktive spiller
             normalizeDealerIndex();
             dealerIndex = getNextActiveSeat(dealerIndex);
             normalizeDealerIndex();
 
+            // Oppdater visning
             updateStackDisplay();
             document.getElementById("main-pot-display").innerText = "POT: 0";
 
             if (popupWindow && !popupWindow.closed) {
                 var data = tournamentLevels[currentLvlIdx];
                 var posShortMap = getPositionMap("short");
-                var list = players.map(function(p, idx){
-                    return {
+                var list = players.map(function(p, idx) {
+                return {
                     name: p.name,
                     pos: posShortMap[idx],
                     stack: p.stack,
                     active: p.stack > 0
-                    };
+                };
                 });
                 popupWindow.updateData(list, data.sb, data.bb);
             }
