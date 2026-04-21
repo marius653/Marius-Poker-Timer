@@ -9,9 +9,12 @@
         .hidden { display: none !important; }
         #setup-screen { width: 550px; margin: 20px auto; background: #222; padding: 15px; border-radius: 15px; text-align: center; transform: scale(var(--setup-scale)); transform-origin: top center; }
         #setup-screen h2 { margin: 0 0 12px 0; }
+        .setup-grid { display: flex; gap: 20px; width: 100%; justify-content: center; align-items: flex-start; }
+        .setup-box { flex: 1; min-width: 350px; max-width: 500px; background: #222; padding: 20px; border-radius: 12px; }
         .player-input-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; background: #333; padding: 10px; border-radius: 5px; }
         .pos-label { font-size: 11px; color: #ffcc00; font-weight: bold; width: 120px; text-align: left; text-transform: uppercase; }
         .name-in { flex-grow: 1; background: #1a1a1a; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; }
+        @media (max-width: 900px) {.setup-grid { flex-direction: column;}}
         #timer-screen { width: 100vw; height: 100vh; display: grid; grid-template-columns: 1fr 2fr 1fr; grid-template-rows: 2.5fr 0.6fr 0.4fr 0.7fr; align-items: center; padding: 20px; box-sizing: border-box; }
         #timer { font-size: 9vw; font-weight: bold; font-family: monospace; text-align: center; line-height: 1; }
         .tit { font-size: 1.5vw; color: #888; text-transform: uppercase; text-align: center; }
@@ -33,26 +36,26 @@
     </style>
 </head>
 <body>
-
     <div id="setup-screen">
         <h2 style="color:#ffcc00">Poker Setup</h2>
-        <div id="player-inputs"></div>
-        <div style="margin-top: 20px;">Start Stack: <input type="number" id="start-stack-input" value="2500" style="width:80px; padding:5px;"></div>
-        <div style="margin-top:20px;">
-            <h3 style="color:#ffcc00">Blind Levels</h3>
-            <table id="levels-table" style="width:100%; border-collapse: collapse; font-size:14px;">
-                <thead>
-                    <tr style="background:#333;">
-                        <th>Level</th>
-                        <th>Min</th>
-                        <th>BB</th>
-                        <th>SB (auto)</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+        <div class="setup-grid">
+            <div class="setup-box">
+                <div id="player-inputs"></div>
+                <div style="margin-top: 20px;">
+                    Start Stack:
+                    <input type="number" id="start-stack-input" value="2500">
+                </div>
+                <button onclick="startApp()" style="width:100%; margin-top:20px;">
+                    START SPILL
+                </button>
+            </div>
+            <div class="setup-box">
+                <h3 style="color:#ffcc00">Blind Levels</h3>
+                <table id="levels-table">
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
-        <button onclick="startApp()" style="width:100%; margin-top:20px; background:#2e7d32; color:white; padding:18px; border:none; border-radius:8px; font-size:22px; font-weight:bold; cursor:pointer;">START SPILL</button>
     </div>
 
     <div id="timer-screen" class="hidden">
