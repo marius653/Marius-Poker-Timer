@@ -472,8 +472,8 @@
             var svg = document.getElementById("svg-container");
             svg.innerHTML = "";
 
-            for (var i = 0; i < 120; i++) {
-                var angle = (i * 3 - 90) * Math.PI / 180;
+            for (var i = 0; i < 80; i++) {
+                var angle = (i * 4.5 - 90) * Math.PI / 180;
                 var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
 
                 var x = 100 + 70 * Math.cos(angle);
@@ -481,9 +481,9 @@
 
                 rect.setAttribute("x", x - 1.5);
                 rect.setAttribute("y", y - 6);
-                rect.setAttribute("width", "3");
-                rect.setAttribute("height", "12");
-                rect.setAttribute("rx", "1");
+                r.setAttribute("width", "2.5");
+                r.setAttribute("height", "11");
+                r.setAttribute("rx", "1");
                 rect.setAttribute("fill", "#2a2a2a");
                 rect.setAttribute("transform", "rotate(" + (i * 6) + "," + x + "," + y + ")");
                 rect.setAttribute("id", "r-" + i);
@@ -499,9 +499,9 @@
                 (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
 
             var total = tournamentLevels[currentLvlIdx].min * 60;
-            var filled = Math.floor(((total - timeLeft) / total) * 120);
+            var filled = Math.floor(((total - timeLeft) / total) * 80);
 
-            for (var i = 0; i < 120; i++) {
+            for (var i = 0; i < 80; i++) {
                 var el = document.getElementById("r-" + i);
                 if (el) {
                 el.setAttribute("fill", i < filled ? "#8b0000" : "#2a2a2a");
