@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <title>Poker Timer</title>
     <style>
-        :root { --setup-scale: 1.8; --chips-scale: 1.6; --pot-scale: 1.0; }
+        :root { --setup-scale: 1.2; --chips-scale: 1.6; --pot-scale: 1.0; }
         body { background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('bakgrunn.png'); background-size: cover; background-position: center center; background-attachment: fixed; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
         .hidden { display: none !important; }
-        #setup-screen { width: calc(550px * var(--setup-scale)); margin: 30px auto; background: #222; padding: calc(30px * var(--setup-scale)); border-radius: 15px; text-align: center; }
+        #setup-screen { width: 550px; margin: 30px auto; background: #222; padding: 30px; border-radius: 15px; text-align: center; transform: scale(var(--setup-scale)); transform-origin: top center; }
         .player-input-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; background: #333; padding: 10px; border-radius: 5px; }
         .pos-label { font-size: 11px; color: #ffcc00; font-weight: bold; width: 120px; text-align: left; text-transform: uppercase; }
         .name-in { flex-grow: 1; background: #1a1a1a; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; }
