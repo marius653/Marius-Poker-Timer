@@ -473,9 +473,16 @@
             svg.innerHTML = "";
 
             var segments = 80;
-            var radius = 62;
-            var rectWidth = 2;
-            var rectHeight = 8;
+
+            var SCALE = 1.2; // 🔥 juster denne
+
+            var baseRadius = 80;
+            var baseWidth = 2.2;
+            var baseHeight = 10;
+
+            var radius = baseRadius * SCALE;
+            var rectWidth = baseWidth * SCALE;
+            var rectHeight = baseHeight * SCALE;
 
             for (var i = 0; i < segments; i++) {
                 var angleDeg = i * (360 / segments);
@@ -485,11 +492,12 @@
                 var y = 100 + radius * Math.sin(angleRad);
 
                 var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+
                 rect.setAttribute("x", x - rectWidth / 2);
                 rect.setAttribute("y", y - rectHeight / 2);
                 rect.setAttribute("width", rectWidth);
                 rect.setAttribute("height", rectHeight);
-                rect.setAttribute("rx", "1");
+                rect.setAttribute("rx", rectWidth / 2);
                 rect.setAttribute("fill", "#2a2a2a");
                 rect.setAttribute("transform", "rotate(" + angleDeg + "," + x + "," + y + ")");
                 rect.setAttribute("id", "r-" + i);
