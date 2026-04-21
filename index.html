@@ -133,15 +133,15 @@
             if (popupWindow && !popupWindow.closed) { popupWindow.focus(); return; }
             popupWindow = window.open("", "PokerWizardV54", "width=1000,height=850,resizable=yes,scrollbars=yes");
             var data = tournamentLevels[currentLvlIdx];
-            var pList = players.map(function(p, i) { return { name: p.name, pos: posShort[(i - (dealerIndex - 3) + 6) % 6] }; });
+            var pList = players.map(function(p, i) { return { name: p.name, pos: posShort[(i - (dealerIndex - 3) + 6) % 6], stack: p.stack}; });
 
             var content = '<html><head><title>Runde</title><style>body{background:#1a1a1a;color:white;font-family:sans-serif;padding:20px;user-select:none;}.header{font-size:40px;color:#ffcc00;text-align:center;font-weight:bold;margin-bottom:20px;text-transform:uppercase;}.row{display:grid;grid-template-columns:220px 1fr 150px;align-items:center;gap:20px;background:#262626;padding:15px;margin-bottom:10px;border-radius:10px;}.chips{display:flex;gap:12px;justify-content:center;}.chip-wrap{position:relative;}.chip{width:65px;height:65px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;border:3px dashed rgba(255,255,255,0.2);cursor:pointer;}.c10{background:#eee;color:#111;}.c20{background:#a00;color:#fff;}.c50{background:#060;color:#fff;}.c100{background:#006;color:#fff;}.c500{background:#111;color:#fff;border-color:#444;}.count{position:absolute;top:-10px;right:-5px;background:#ffcc00;color:#000;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;border:2px solid:#1a1a1a;}.val{font-size:32px;font-weight:bold;color:#ffcc00;text-align:right;}.nav{display:flex;justify-content:space-between;align-items:center;margin-top:30px;}button{padding:18px 40px;border-radius:10px;border:none;cursor:pointer;font-weight:bold;font-size:20px;color:white;}</style></head><body><div id="ui"></div><script>' +
             'var state = []; var stepIdx = 0; var curSB = 0; var curBB = 0; var chipVals = [10, 20, 50, 100, 500];' +
             'window.updateBlinds = function(sb, bb) { curSB = sb; curBB = bb; if(stepIdx === 0) resetRound(); };' +
-            'window.updateData = function(list, sb, bb) { curSB = sb; curBB = bb; state = list.map(function(p){ return {name:p.name, pos:p.pos, roundBet:0, stepBet:0, isWinner:false, stepChips:{10:0,20:0,50:0,100:0,500:0}}; }); resetRound(); };' +
+            'window.updateData = function(list, sb, bb) { curSB = sb; curBB = bb; state = list.map(function(p){ return {name:p.name, pos:p.pos, stack:p.stack, roundBet:0, stepBet:0, isWinner:false, stepChips:{10:0,20:0,50:0,100:0,500:0}}; }); resetRound(); };' +
             'function resetRound() { stepIdx = 0; state.forEach(function(p){ p.roundBet = 0; p.stepBet = 0; p.isWinner = false; p.stepChips = {10:0,20:0,50:0,100:0,500:0}; if(p.pos === "SB"){ p.roundBet = curSB; p.stepBet = curSB; assign(p, curSB); } if(p.pos === "BB"){ p.roundBet = curBB; p.stepBet = curBB; assign(p, curBB); } }); render(); }' +
             'function assign(p, val) { var rem = val; for(var i=4; i>=0; i--){ var v = chipVals[i]; p.stepChips[v] = Math.floor(rem/v); rem %= v; } }' +
-            'window.doAdd = function(i, v) { state[i].stepBet += v; state[i].roundBet += v; state[i].stepChips[v]++; render(); };' +
+            'window.doAdd = function(i, v) { var p = state[i]; var remaining = p.stack - p.roundBet; if (remaining <= 0) return; var addAmount = Math.min(v, remaining); p.stepBet += addAmount; p.roundBet += addAmount; assign(p, p.stepBet); render(); };' +                
             'window.doRem = function(e, i, v) { e.preventDefault(); if(state[i].stepChips[v]>0){ state[i].stepBet -= v; state[i].roundBet -= v; state[i].stepChips[v]--; render(); } return false; };' +
             'window.doStep = function(dir) { if(stepIdx === 4 && dir === 1) { window.opener.finalizeRound(state); resetRound(); return; } if(stepIdx === 0 && dir === -1) return; stepIdx += dir; state.forEach(function(p){ p.stepBet = 0; p.stepChips = {10:0,20:0,50:0,100:0,500:0}; }); render(); };' +
             'function render() { var pot = 0; state.forEach(function(p){ pot += p.roundBet; }); if(window.opener) window.opener.updatePotRealtime(pot); var h = "<div class=\'header\'>" + ["PREFLOP", "FLOP", "TURN", "RIVER", "VELG VINNER"][stepIdx] + "</div>";' +
@@ -156,11 +156,38 @@
 
         window.updatePotRealtime = function(val) { document.getElementById("main-pot-display").innerText = "POT: " + val; };
         window.finalizeRound = function(st) {
-            var pot = 0; st.forEach(function(p){ pot += p.roundBet; });
-            var wins = st.filter(function(p){ return p.isWinner; });
-            players.forEach(function(p, i) { p.stack -= st[i].roundBet; });
-            if(wins.length > 0) { var share = Math.floor(pot / wins.length); st.forEach(function(ew, i) { if(ew.isWinner) players[i].stack += share; }); }
-            dealerIndex = (dealerIndex + 1) % 6; updateStackDisplay(); document.getElementById("main-pot-display").innerText = "POT: 0";
+            players.forEach(function(p, i) {
+                p.stack -= st[i].roundBet;
+            });
+
+            var sorted = st.map((p, i) => ({...p, index: i}))
+                   .sort((a,b) => a.roundBet - b.roundBet);
+
+            var prev = 0;
+        
+            for (var i = 0; i < sorted.length; i++) {
+                var level = sorted[i].roundBet;
+                var contributors = sorted.slice(i);
+        
+                var potSize = (level - prev) * contributors.length;
+                if (potSize <= 0) continue;
+        
+                var winners = contributors.filter(p => p.isWinner);
+        
+                if (winners.length > 0) {
+                    var share = Math.floor(potSize / winners.length);
+        
+                    winners.forEach(w => {
+                        players[w.index].stack += share;
+                    });
+                }
+        
+                prev = level;
+            }
+            
+            dealerIndex = (dealerIndex + 1) % 6;
+            updateStackDisplay();
+            document.getElementById("main-pot-display").innerText = "POT: 0";
         };
 
         function initSVG() {
