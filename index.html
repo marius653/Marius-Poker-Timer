@@ -39,6 +39,10 @@
         .p-name-main { font-size: 1.4vw; color: #fff; margin-bottom: 2px; font-weight: 500; }
         .p-amt { font-size: 2.5vw; color: #ffcc00; font-weight: bold; }
         .btn-blue { background: #1565c0; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; }
+        .stack-edit-wrapper { grid-column: span 3; display: flex; justify-content: center; margin-top: 10px; }
+        #stack-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .modal-content { background: #222; padding: 25px; border-radius: 12px; width: 400px; text-align: center; }
+        #stack-edit-list input { width: 100%; margin: 5px 0; padding: 8px; background: #111; color: white; border: 1px solid #444; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -84,6 +88,18 @@
             <div class="chip c10">10</div><div class="chip c20">20</div><div class="chip c50">50</div><div class="chip c100">100</div><div class="chip c500">500</div>
         </div>
         <div class="stacks-container" id="stacks-display"></div>
+        <div class="stack-edit-wrapper">
+            <button class="btn-blue" onclick="openStackEditor()">Endre stacks</button>
+        </div>
+    </div>
+
+    <div id="stack-modal" class="hidden">
+        <div class="modal-content">
+            <h2>Endre stacks</h2>
+            <div id="stack-edit-list"></div>
+            <button class="btn-blue" onclick="saveStacks()">Lagre</button>
+            <button class="btn-small" onclick="closeStackEditor()">Lukk</button>
+        </div>
     </div>
 
     <script>
@@ -293,6 +309,29 @@
             var b = document.getElementById("startBtn");
             if (timerId) { clearInterval(timerId); timerId = null; b.innerText = "START"; }
             else { b.innerText = "PAUSE"; timerId = setInterval(function() { if (timeLeft > 0) { timeLeft--; updateDisplay(); } else { currentLvlIdx++; if(currentLvlIdx < tournamentLevels.length) { setupLevel(); new Audio("https://google.com").play(); } } }, 1000); }
+        }
+
+        function openStackEditor() {
+            var html = "";
+            for (var i = 0; i < players.length; i++) {
+                html += '<div><div style="color:#ffcc00; margin-top:10px;">' + players[i].name + '</div>';
+                html += '<input type="number" id="stack-' + i + '" value="' + players[i].stack + '"></div>';
+            }
+            document.getElementById("stack-edit-list").innerHTML = html;
+            document.getElementById("stack-modal").classList.remove("hidden");
+        }
+
+         function closeStackEditor() {
+            document.getElementById("stack-modal").classList.add("hidden");
+        }   
+
+        function saveStacks() {
+            for (var i = 0; i < players.length; i++) {
+                var val = parseInt(document.getElementById("stack-" + i).value) || 0;
+                players[i].stack = val;
+            }
+            updateStackDisplay();
+            closeStackEditor();
         }
 
         document.addEventListener("input", function(e) {
