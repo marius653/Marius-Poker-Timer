@@ -32,7 +32,7 @@
         .chips-row { grid-column: span 3; display: flex; justify-content: center; gap: calc(25px * var(--chips-scale)); cursor: ns-resize; position: relative; z-index: 1; margin-top: 10px; }
         .chip { width: calc(60px * var(--chips-scale)); height: calc(60px * var(--chips-scale)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: calc(14px * var(--chips-scale)); font-weight: bold; border: 2px dashed rgba(255,255,255,0.2); pointer-events: none; }
         .c10 { background: #eee; color: #111; } .c20 { background: #a00; color: #fff; } .c50 { background: #060; color: #fff; } .c100 { background: #006; color: #fff; } .c500 { background: #111; color: #fff; border-color: #444; }
-        .stacks-container { grid-column: span 3; display: flex; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 12px; border: 1px solid #333; align-self: end; margin-bottom: 100px; }
+        .stacks-container { grid-column: span 3; display: flex; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 12px; border: 1px solid #333; align-self: end; margin-bottom: 100px; position: relative; z-index: 1; }
         .player-stack { text-align: center; position: relative; min-width: 140px; }
         .pos-tag { font-size: 14px; background: #ffcc00; color: black; padding: 2px 7px; border-radius: 3px; font-weight: bold; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); text-transform: uppercase; white-space: nowrap; }
         .pos-tag.dealer-color { background: #2e7d32; color: white; }
@@ -40,7 +40,7 @@
         .p-amt { font-size: 2.5vw; color: #ffcc00; font-weight: bold; }
         .btn-blue { background: #1565c0; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; }
         .btn-gray { background: #303030; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; }
-        .stack-edit-wrapper { grid-column: span 3; display: flex; justify-content: center; margin-top: 10px; }
+        .stack-edit-wrapper { grid-column: span 3; display: flex; justify-content: center; margin-top: 10px; position: relative; z-index: 5; }
         #stack-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .modal-content { background: #222; padding: 25px; border-radius: 12px; width: 400px; text-align: center; }
         #stack-edit-list input { width: 100%; margin: 5px 0; padding: 8px; background: #111; color: white; border: 1px solid #444; border-radius: 5px; }
