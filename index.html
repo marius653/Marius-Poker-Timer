@@ -37,6 +37,20 @@
         <h2 style="color:#ffcc00">Poker Setup</h2>
         <div id="player-inputs"></div>
         <div style="margin-top: 20px;">Start Stack: <input type="number" id="start-stack-input" value="2500" style="width:80px; padding:5px;"></div>
+        <div style="margin-top:20px;">
+            <h3 style="color:#ffcc00">Blind Levels</h3>
+            <table id="levels-table" style="width:100%; border-collapse: collapse; font-size:14px;">
+                <thead>
+                    <tr style="background:#333;">
+                        <th>Level</th>
+                        <th>Min</th>
+                        <th>BB</th>
+                        <th>SB (auto)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
         <button onclick="startApp()" style="width:100%; margin-top:20px; background:#2e7d32; color:white; padding:18px; border:none; border-radius:8px; font-size:22px; font-weight:bold; cursor:pointer;">START SPILL</button>
     </div>
 
@@ -71,6 +85,28 @@
             { lvl: 13, min: 10, bb: 600, sb: 300 }, { lvl: 14, min: 10, bb: 800, sb: 400 },
             { lvl: 15, min: 10, bb: 1000, sb: 500 }, { lvl: 16, min: 10, bb: 1400, sb: 700 }
         ];
+
+        initLevelsTable();
+
+        function initLevelsTable() {
+            var tbody = document.querySelector("#levels-table tbody");
+            tbody.innerHTML = "";
+
+            tournamentLevels.forEach(function(lvl, i) {
+                var row = document.createElement("tr");
+                row.style.background = i % 2 ? "#2a2a2a" : "#1f1f1f";
+
+                row.innerHTML = `
+                    <td>${lvl.lvl}</td>
+                    <td><input type="number" value="${lvl.min}" data-i="${i}" class="lvl-min" style="width:60px"></td>
+                    <td><input type="number" value="${lvl.bb}" data-i="${i}" class="lvl-bb" style="width:80px"></td>
+                    <td class="sb-cell">${lvl.sb}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
         var posShort = ["UTG", "HJ", "CO", "D", "SB", "BB"];
         var posFullMain = ["UTG", "Hijack", "Cutoff", "Dealer", "Small blind", "Big blind"];
         var players = []; var dealerIndex = 3; var currentLvlIdx = 0; var timeLeft = 0; var timerId = null; var popupWindow = null;
@@ -85,8 +121,28 @@
             var label = ["Under the gun", "Hijack", "Cutoff", "Button", "Small blind", "Big blind"][i];
             inputCont.innerHTML += '<div class="player-input-row"><span class="pos-label">' + label + '</span><input type="text" id="name-' + i + '" class="name-in" value="Spiller ' + (i+1) + '"></div>';
         }
+        
+        function updateLevelsFromTable() {
+            var mins = document.querySelectorAll(".lvl-min");
+            var bbs = document.querySelectorAll(".lvl-bb");
+
+            tournamentLevels = [];
+
+            for (var i = 0; i < mins.length; i++) {
+                var min = parseInt(mins[i].value) || 1;
+                var bb = parseInt(bbs[i].value) || 1;
+
+                tournamentLevels.push({
+                    lvl: i + 1,
+                    min: min,
+                    bb: bb,
+                    sb: Math.floor(bb / 2)
+                });
+            }
+        }
 
         function startApp() {
+            updateLevelsFromTable();
             var stack = parseInt(document.getElementById('start-stack-input').value) || 2500;
             players = [];
             for(var i=0; i<6; i++) { players.push({ name: document.getElementById('name-' + i).value, stack: stack }); }
@@ -226,6 +282,15 @@
             if (timerId) { clearInterval(timerId); timerId = null; b.innerText = "START"; }
             else { b.innerText = "PAUSE"; timerId = setInterval(function() { if (timeLeft > 0) { timeLeft--; updateDisplay(); } else { currentLvlIdx++; if(currentLvlIdx < tournamentLevels.length) { setupLevel(); new Audio("https://google.com").play(); } } }, 1000); }
         }
+
+        document.addEventListener("input", function(e) {
+            if (e.target.classList.contains("lvl-bb")) {
+                var bb = parseInt(e.target.value) || 0;
+                var row = e.target.closest("tr");
+                row.querySelector(".sb-cell").innerText = Math.floor(bb / 2);
+            }
+        });
+
     </script>
 </body>
 </html>
