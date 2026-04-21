@@ -282,11 +282,19 @@
         function setupLevel() {
             var data = tournamentLevels[currentLvlIdx];
             timeLeft = data.min * 60;
+
             document.getElementById('cur-val').innerText = data.sb + "/" + data.bb;
+
             var next = tournamentLevels[currentLvlIdx + 1];
             document.getElementById('next-val').innerText = next ? next.sb + "/" + next.bb : "--";
+
             updateDisplay();
-            if(popupWindow && !popupWindow.closed) { popupWindow.updateBlinds(data.sb, data.bb); }
+
+            updateStackDisplay(); // 🔥 LEGG TIL DENNE
+
+            if (popupWindow && !popupWindow.closed) {
+                popupWindow.updateBlinds(data.sb, data.bb);
+            }
         }
 
         function manualLevelChange(dir) {
@@ -310,13 +318,13 @@
                 var busted = players[i].stack <= 0;
 
                 var currentBB = tournamentLevels[currentLvlIdx] ? tournamentLevels[currentLvlIdx].bb : 1;
-                var bbCount = currentBB > 0 ? (players[i].stack / currentBB) : 0;
+                var bbCount = currentBB > 0 ? Math.floor(players[i].stack / currentBB) : 0;
 
                 html += '<div class="player-stack ' + (busted ? 'busted' : '') + '">' +
                 '<div class="pos-tag ' + ((posName === "Dealer" || posName === "Dealer/SB") ? "dealer-color" : "") + '">' + posName + '</div>' +
                 '<div class="p-name-main">' + players[i].name + '</div>' +
                 '<div class="p-amt">' + players[i].stack + '</div>' +
-                '<div class="p-bb">' + bbCount.toFixed(1) + ' BB</div>' +
+                '<div class="p-bb">' + bbCount + ' BB</div>' +
                 '</div>';
             }
 
