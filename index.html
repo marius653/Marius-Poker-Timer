@@ -29,6 +29,7 @@
         .top-right-controls { position: absolute; top: 25px; right: 25px; display: flex; gap: 15px; z-index: 500; }
         .btn-small { padding: 10px 20px; font-size: 14px; background: #444; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         #main-pot-display { grid-column: span 3; text-align: center; font-size: calc(4vw * var(--pot-scale)); font-weight: bold; color: #ffcc00; cursor: ns-resize; position: relative; z-index: 1; margin-top: -230px; }
+        .chips-image { grid-column: span 3; width: 320px; max-width: 80vw; display: block; margin: 0 auto; cursor: ns-resize; position: relative; z-index: 1; }
         .chips-row { grid-column: span 3; display: flex; justify-content: center; gap: calc(25px * var(--chips-scale)); cursor: ns-resize; position: relative; z-index: 1; margin-top: -150px; }
         .chip { width: calc(60px * var(--chips-scale)); height: calc(60px * var(--chips-scale)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: calc(14px * var(--chips-scale)); font-weight: bold; border: 2px dashed rgba(255,255,255,0.2); pointer-events: none; }
         .c10 { background: #eee; color: #111; } .c20 { background: #a00; color: #fff; } .c50 { background: #060; color: #fff; } .c100 { background: #006; color: #fff; } .c500 { background: #111; color: #fff; border-color: #444; }
@@ -86,7 +87,8 @@
         <div class="side" style="opacity:0.3"><div class="tit">Neste</div><div id="next-val" class="val">--</div></div>
         <div id="main-pot-display" onmousedown="handleDragStart(event, this)">POT: 0</div>
         <div class="chips-row" onmousedown="handleDragStart(event, this)">
-            <div class="chip c10">10</div><div class="chip c20">20</div><div class="chip c50">50</div><div class="chip c100">100</div><div class="chip c500">500</div>
+            <img src="Pokerchips.png" class="chips-image" />
+            <!-- <div class="chip c10">10</div><div class="chip c20">20</div><div class="chip c50">50</div><div class="chip c100">100</div><div class="chip c500">500</div> -->
         </div>
         <div class="stacks-container" id="stacks-display"></div>
         <div class="stack-edit-wrapper">
