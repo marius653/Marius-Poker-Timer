@@ -202,16 +202,31 @@
         }
 
         function updateStackDisplay() {
+            var activePlayers = players.filter(p => p.stack > 0);
             var html = "";
-            for(var i=0; i<players.length; i++) {
-                var posIdx = (i - (dealerIndex - 3) + 6) % 6;
-                var posName = posFullMain[posIdx];
-                html += '<div class="player-stack"><div class="pos-tag ' + (posName === "Dealer" ? "dealer-color" : "") + '">' + posName + '</div><div class="p-name-main">' + players[i].name + '</div><div class="p-amt">' + players[i].stack + '</div></div>';
+
+            for (var i = 0; i < players.length; i++) {
+                var p = players[i];
+                if (p.stack <= 0) {
+                    html += '<div class="player-stack"><div class="pos-tag" style="background:#555;color:#fff;">Slått ut</div><div class="p-name-main">' + p.name + '</div><div class="p-amt">0</div></div>';
+                    continue;
+                }
+                var activeIndex = activePlayers.indexOf(p);
+                var posIdx = (activeIndex - (dealerIndex % activePlayers.length) + activePlayers.length) % activePlayers.length;
+
+                var posNames = ["UTG", "HJ", "CO", "D", "SB", "BB"];
+                var posName = posNames[posIdx] || "";
+
+                html += '<div class="player-stack"><div class="pos-tag ' + (posName === "D" ? "dealer-color" : "") + '">' + posName + '</div><div class="p-name-main">' + p.name + '</div><div class="p-amt">' + p.stack + '</div></div>';
             }
             document.getElementById('stacks-display').innerHTML = html;
             if(popupWindow && !popupWindow.closed) {
                 var data = tournamentLevels[currentLvlIdx];
-                var list = players.map(function(p, idx){ return { name: p.name, pos: posShort[(idx - (dealerIndex - 3) + 6) % 6] }; });
+
+                var list = activePlayers.map(function(p, idx){
+                    return { name: p.name, pos: posShort[idx % posShort.length] };
+                });
+
                 popupWindow.updateData(list, data.sb, data.bb);
             }
         }
@@ -220,7 +235,7 @@
             if (popupWindow && !popupWindow.closed) { popupWindow.focus(); return; }
             popupWindow = window.open("", "PokerWizardV54", "width=1000,height=850,resizable=yes,scrollbars=yes");
             var data = tournamentLevels[currentLvlIdx];
-            var pList = players.map(function(p, i) { return { name: p.name, pos: posShort[(i - (dealerIndex - 3) + 6) % 6], stack: p.stack}; });
+            var pList = players.filter(p => p.stack > 0).map(function(p, i){ return { name: p.name, pos: posShort[i % posShort.length] }; });
 
             var content = '<html><head><title>Runde</title><style>body{background:#1a1a1a;color:white;font-family:sans-serif;padding:20px;user-select:none;}.header{font-size:40px;color:#ffcc00;text-align:center;font-weight:bold;margin-bottom:20px;text-transform:uppercase;}.row{display:grid;grid-template-columns:220px 1fr 150px;align-items:center;gap:20px;background:#262626;padding:15px;margin-bottom:10px;border-radius:10px;}.chips{display:flex;gap:12px;justify-content:center;}.chip-wrap{position:relative;}.chip{width:65px;height:65px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;border:3px dashed rgba(255,255,255,0.2);cursor:pointer;}.c10{background:#eee;color:#111;}.c20{background:#a00;color:#fff;}.c50{background:#060;color:#fff;}.c100{background:#006;color:#fff;}.c500{background:#111;color:#fff;border-color:#444;}.count{position:absolute;top:-10px;right:-5px;background:#ffcc00;color:#000;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;border:2px solid:#1a1a1a;}.val{font-size:32px;font-weight:bold;color:#ffcc00;text-align:right;}.nav{display:flex;justify-content:space-between;align-items:center;margin-top:30px;}button{padding:18px 40px;border-radius:10px;border:none;cursor:pointer;font-weight:bold;font-size:20px;color:white;}</style></head><body><div id="ui"></div><script>' +
             'var state = []; var stepIdx = 0; var curSB = 0; var curBB = 0; var chipVals = [10, 20, 50, 100, 500];' +
@@ -272,7 +287,10 @@
                 prev = level;
             }
             
-            dealerIndex = (dealerIndex + 1) % 6;
+            do {
+                dealerIndex = (dealerIndex + 1) % players.length;
+            } while (players[dealerIndex].stack <= 0);
+
             updateStackDisplay();
             document.getElementById("main-pot-display").innerText = "POT: 0";
 
