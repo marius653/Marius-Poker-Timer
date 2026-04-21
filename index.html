@@ -22,9 +22,9 @@
         .name-in { flex-grow: 1; background: #1a1a1a; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; }
         @media (max-width: 900px) { .setup-grid { flex-direction: column; } #setup-screen { width: 95%; } }
         #timer-screen { width: 100vw; height: 100vh; display: grid; grid-template-columns: 1fr 2fr 1fr; grid-template-rows: 2.5fr 0.6fr 0.4fr 0.7fr; align-items: center; padding: 20px; box-sizing: border-box; }
-        #timer { position: relative; z-index: 2; font-size: 9vw; font-weight: bold; font-family: monospace; text-align: center; line-height: 1; }
-        .center-wrap { position: relative; display: flex; align-items: center; justify-content: center; width: 45vw; height: 45vw; margin: 0 auto; }
+        .center-wrap { position: relative; display: flex; align-items: center; justify-content: center; width: 34vw; height: 34vw; margin: 0 auto; }
         #svg-container { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+        #timer { position: relative; z-index: 2; }
         .tit { font-size: 1.5vw; color: #888; text-transform: uppercase; text-align: center; }
         .val { font-size: 5vw; font-weight: bold; text-align: center; }
         .top-left-controls { position: absolute; top: 25px; left: 25px; display: flex; gap: 10px; z-index: 500; }
@@ -472,20 +472,26 @@
             var svg = document.getElementById("svg-container");
             svg.innerHTML = "";
 
-            for (var i = 0; i < 80; i++) {
-                var angle = (i * 4.5 - 90) * Math.PI / 180;
+            var segments = 80;
+            var radius = 62;
+            var rectWidth = 2;
+            var rectHeight = 8;
+
+            for (var i = 0; i < segments; i++) {
+                var angleDeg = i * (360 / segments);
+                var angleRad = (angleDeg - 90) * Math.PI / 180;
+
+                var x = 100 + radius * Math.cos(angleRad);
+                var y = 100 + radius * Math.sin(angleRad);
+
                 var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-
-                var x = 100 + 75 * Math.cos(angle);
-                var y = 100 + 75 * Math.sin(angle);
-
-                rect.setAttribute("x", x - 1.5);
-                rect.setAttribute("y", y - 4.5);
-                rect.setAttribute("width", "2.5");
-                rect.setAttribute("height", "11");
+                rect.setAttribute("x", x - rectWidth / 2);
+                rect.setAttribute("y", y - rectHeight / 2);
+                rect.setAttribute("width", rectWidth);
+                rect.setAttribute("height", rectHeight);
                 rect.setAttribute("rx", "1");
                 rect.setAttribute("fill", "#2a2a2a");
-                rect.setAttribute("transform", "rotate(" + (i * 6) + "," + x + "," + y + ")");
+                rect.setAttribute("transform", "rotate(" + angleDeg + "," + x + "," + y + ")");
                 rect.setAttribute("id", "r-" + i);
 
                 svg.appendChild(rect);
