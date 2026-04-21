@@ -10,10 +10,11 @@
         #setup-screen { width: 1100px; margin: 30px auto; background: #222; padding: 15px; border-radius: 15px; text-align: center; transform: scale(var(--setup-scale)); transform-origin: top center; }
         #setup-screen h2 { margin: 0 0 12px 0; }
         .setup-grid { display: flex; gap: 25px; justify-content: center; align-items: flex-start; }
-        .setup-box { flex: 1; width: 500px; background: #222; padding: 20px; border-radius: 12px; }
+        .setup-box { flex: 1; width: 500px; background: #222; padding: 20px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; }
         .setup-box h3 { text-align: center; margin: 0 0 10px 0; }
-        .box-title { text-align: center; font-size: 20px; font-weight: bold; color: #ffcc00; margin-bottom: 10px; }
+        .box-title { width: 100%; text-align: center; font-size: 20px; font-weight: bold; color: #ffcc00; margin-bottom: 10px; }
         .box-subtitle { text-align: center; font-size: 12px; color: #aaa; margin-bottom: 10px; }
+        #levels-table { width: 100%; text-align: center; }
         .start-wrapper { width: 100%; display: flex; justify-content: center; margin-top: 60px; }   
         .start-wrapper button { width: 320px; padding: 18px; font-size: 22px; font-weight: bold; background: #2e7d32; color: white; border: none; border-radius: 10px; cursor: pointer; }
         .player-input-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; background: #333; padding: 10px; border-radius: 5px; }
@@ -61,6 +62,9 @@
                 <table id="levels-table">
                     <tbody></tbody>
                 </table>
+            </div>
+            <div class="start-wrapper">
+                <button onclick="startApp()">START SPILL</button>
             </div>
         </div>
     </div>
