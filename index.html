@@ -214,7 +214,7 @@
                 var activeIndex = activePlayers.indexOf(p);
                 var posIdx = (activeIndex - (dealerIndex % activePlayers.length) + activePlayers.length) % activePlayers.length;
 
-                var posNames = ["UTG", "HJ", "CO", "D", "SB", "BB"];
+                var posNames = posFullMain;
                 var posName = posNames[posIdx] || "";
 
                 html += '<div class="player-stack"><div class="pos-tag ' + (posName === "D" ? "dealer-color" : "") + '">' + posName + '</div><div class="p-name-main">' + p.name + '</div><div class="p-amt">' + p.stack + '</div></div>';
@@ -244,7 +244,7 @@
             'function resetRound() { stepIdx = 0; state.forEach(function(p){ p.roundBet = 0; p.stepBet = 0; p.isWinner = false; p.stepChips = {10:0,20:0,50:0,100:0,500:0}; if(p.pos==="SB"){p.roundBet=curSB;p.stepBet=curSB;p.stepChips[curSB]=(p.stepChips[curSB]||0)+1;} if(p.pos==="BB"){p.roundBet=curBB;p.stepBet=curBB;p.stepChips[curBB]=(p.stepChips[curBB]||0)+1;} }); render(); }' +
             'function assign(p, val) { }' +
             'window.doAdd = function(i, v) { var p = state[i]; var remaining = p.stack - p.roundBet; if (remaining <= 0) return; var addAmount = Math.min(v, remaining); p.stepBet += addAmount; p.roundBet += addAmount; p.stepChips[v]++; render(); };' +                
-            'window.doRem = function(e, i, v) { e.preventDefault(); if(state[i].stepChips[v]>0){ state[i].stepBet -= v; state[i].roundBet -= v; state[i].stepChips[v]--; render(); } return false; };' +
+            'window.doAdd = function(i, v) { var p = state[i]; var remaining = p.stack - p.roundBet; if (remaining <= 0) return; var addAmount = Math.min(v, remaining); if (!p.stepChips[v]) p.stepChips[v] = 0; p.stepBet += addAmount; p.roundBet += addAmount; p.stepChips[v]++; render(); };' +
             'window.doStep = function(dir) { if(stepIdx === 4 && dir === 1) { window.opener.finalizeRound(state); resetRound(); return; } if(stepIdx === 0 && dir === -1) return; stepIdx += dir; state.forEach(function(p){ p.stepBet = 0; p.stepChips = {10:0,20:0,50:0,100:0,500:0}; }); render(); };' +
             'function render() { var pot = 0; state.forEach(function(p){ pot += p.roundBet; }); if(window.opener) window.opener.updatePotRealtime(pot); var h = "<div class=\'header\'>" + ["PREFLOP", "FLOP", "TURN", "RIVER", "VELG VINNER"][stepIdx] + "</div>";' +
             'state.forEach(function(p, i) { if(stepIdx < 4) { h += "<div class=\'row\'><div><b style=\'color:#ffcc00\'>["+p.pos+"]</b> "+p.name+"</div><div class=\'chips\'>"; chipVals.forEach(function(v) { h += "<div class=\'chip-wrap\'>" + (p.stepChips[v]>0 ? "<div class=\'count\'>"+p.stepChips[v]+"</div>" : "") + "<div class=\'chip c"+v+"\' onclick=\'doAdd("+i+","+v+")\' oncontextmenu=\'return doRem(event,"+i+","+v+")\'>"+v+"</div></div>"; }); h += "</div><div class=\'val\'>"+p.stepBet+"</div></div>"; }' +
