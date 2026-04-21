@@ -138,9 +138,133 @@
             });
         }
 
-        var posShort = ["UTG", "HJ", "CO", "D", "SB", "BB"];
-        var posFullMain = ["UTG", "Hijack", "Cutoff", "Dealer", "Small blind", "Big blind"];
-        var players = []; var dealerIndex = 3; var currentLvlIdx = 0; var timeLeft = 0; var timerId = null; var popupWindow = null;
+        var players = [];
+        var dealerIndex = 3; // seat index i players-arrayen
+        var currentLvlIdx = 0;
+        var timeLeft = 0;
+        var timerId = null;
+        var popupWindow = null;
+
+        function getAliveSeatIndexes() {
+            var alive = [];
+            for (var i = 0; i < players.length; i++) {
+                if ((players[i].stack || 0) > 0) alive.push(i);
+            }
+            return alive;
+        }
+
+        function getNextAliveSeatIndex(fromIdx) {
+            if (!players.length) return -1;
+
+            for (var step = 1; step <= players.length; step++) {
+                var idx = (fromIdx + step) % players.length;
+                if ((players[idx].stack || 0) > 0) return idx;
+            }
+            return -1;
+        }
+
+        function normalizeDealerIndex() {
+            var alive = getAliveSeatIndexes();
+            if (!alive.length) return;
+
+            if (!players[dealerIndex] || (players[dealerIndex].stack || 0) <= 0) {
+                var next = getNextAliveSeatIndex(dealerIndex);
+                if (next !== -1) dealerIndex = next;
+                else dealerIndex = alive[0];
+            }
+        }
+
+        function advanceDealerButton() {
+            var alive = getAliveSeatIndexes();
+            if (alive.length <= 1) return;
+
+            var next = getNextAliveSeatIndex(dealerIndex);
+            if (next !== -1) dealerIndex = next;
+        }
+
+        function getPositionTemplates(aliveCount) {
+            if (aliveCount >= 6) {
+                return {
+                    full: ["Dealer", "Small blind", "Big blind", "UTG", "Hijack", "Cutoff"],
+                    short: ["D", "SB", "BB", "UTG", "HJ", "CO"]
+                };
+            }
+            if (aliveCount === 5) {
+                return {
+                    full: ["Dealer", "Small blind", "Big blind", "UTG", "Cutoff"],
+                    short: ["D", "SB", "BB", "UTG", "CO"]
+                };
+            }
+            if (aliveCount === 4) {
+                return {
+                    full: ["Dealer", "Small blind", "Big blind", "UTG"],
+                    short: ["D", "SB", "BB", "UTG"]
+                };
+            }
+            if (aliveCount === 3) {
+                return {
+                    full: ["Dealer", "Small blind", "Big blind"],
+                    short: ["D", "SB", "BB"]
+                };
+            }
+            if (aliveCount === 2) {
+                return {
+                    full: ["Small blind", "Big blind"],
+                    short: ["SB", "BB"]
+                };
+            }
+
+            return {
+                full: ["Dealer"],
+                short: ["D"]
+            };
+        }
+
+        function getPositionMap() {
+            var map = [];
+            for (var i = 0; i < players.length; i++) {
+                map.push({
+                    index: i,
+                    full: "Slått ut",
+                    short: "OUT",
+                    active: false
+                });
+            }
+
+            var alive = getAliveSeatIndexes();
+            if (!alive.length) return map;
+
+            normalizeDealerIndex();
+
+            var templates = getPositionTemplates(alive.length);
+            var orderedAlive = [];
+
+            if (alive.length === 2) {
+                orderedAlive.push(dealerIndex);
+                var huOther = getNextAliveSeatIndex(dealerIndex);
+                if (huOther !== -1) orderedAlive.push(huOther);
+            } else {
+                orderedAlive.push(dealerIndex);
+
+                var cur = dealerIndex;
+                for (var n = 1; n < alive.length; n++) {
+                    cur = getNextAliveSeatIndex(cur);
+                    if (cur !== -1) orderedAlive.push(cur);
+                }
+            }
+
+            for (var j = 0; j < orderedAlive.length; j++) {
+                var seatIdx = orderedAlive[j];
+                map[seatIdx] = {
+                    index: seatIdx,
+                    full: templates.full[j] || "",
+                    short: templates.short[j] || "",
+                    active: true
+                };
+            }
+
+            return map;
+        }
 
         var dragEl = null; var startY = 0; var initialTop = 0;
         function handleDragStart(e, el) { dragEl = el; startY = e.clientY; initialTop = parseInt(window.getComputedStyle(el).top) || 0; document.onmousemove = handleDragMove; document.onmouseup = handleDragEnd; }
@@ -174,10 +298,25 @@
 
         function startApp() {
             updateLevelsFromTable();
+
             var stack = parseInt(document.getElementById('start-stack-input').value) || 2500;
             players = [];
-            for(var i=0; i<6; i++) { players.push({ name: document.getElementById('name-' + i).value, stack: stack }); }
-            currentLvlIdx = 0; setupLevel(); updateStackDisplay(); initSVG();
+
+            for (var i = 0; i < 6; i++) {
+                players.push({
+                    name: document.getElementById('name-' + i).value,
+                    stack: stack
+                });
+            }
+
+            dealerIndex = 3;
+            normalizeDealerIndex();
+
+            currentLvlIdx = 0;
+            setupLevel();
+            updateStackDisplay();
+            initSVG();
+
             document.getElementById('setup-screen').classList.add('hidden');
             document.getElementById('timer-screen').classList.remove('hidden');
         }
@@ -197,58 +336,161 @@
             if (target >= 0 && target < tournamentLevels.length) {
                 currentLvlIdx = target;
                 setupLevel();
-                if(timerId) new Audio('https://google.com').play();
             }
         }
 
         function updateStackDisplay() {
+            var posMap = getPositionMap();
             var html = "";
-            for(var i=0; i<players.length; i++) {
-                var posIdx = (i - (dealerIndex - 3) + 6) % 6;
-                var posName = posFullMain[posIdx];
-                html += '<div class="player-stack"><div class="pos-tag ' + (posName === "Dealer" ? "dealer-color" : "") + '">' + posName + '</div><div class="p-name-main">' + players[i].name + '</div><div class="p-amt">' + players[i].stack + '</div></div>';
+
+            for (var i = 0; i < players.length; i++) {
+                var posName = posMap[i].full;
+                var extraStyle = players[i].stack <= 0 ? 'opacity:0.35;' : '';
+
+                html += '<div class="player-stack" style="' + extraStyle + '">' +
+                    '<div class="pos-tag ' + (posName === "Dealer" ? "dealer-color" : "") + '">' + posName + '</div>' +
+                    '<div class="p-name-main">' + players[i].name + '</div>' +
+                    '<div class="p-amt">' + players[i].stack + '</div>' +
+                    '</div>';
             }
+
             document.getElementById('stacks-display').innerHTML = html;
-            if(popupWindow && !popupWindow.closed) {
+
+            if (popupWindow && !popupWindow.closed) {
                 var data = tournamentLevels[currentLvlIdx];
-                var list = players.map(function(p, idx){ return { name: p.name, pos: posShort[(idx - (dealerIndex - 3) + 6) % 6] }; });
+                var list = players.map(function(p, idx) {
+                    return {
+                        name: p.name,
+                        pos: posMap[idx].short,
+                        posFull: posMap[idx].full,
+                        stack: p.stack,
+                        busted: p.stack <= 0
+                    };
+                });
+
                 popupWindow.updateData(list, data.sb, data.bb);
             }
         }
 
         function openExternalWizard() {
             if (popupWindow && !popupWindow.closed) { popupWindow.focus(); return; }
+
             popupWindow = window.open("", "PokerWizardV54", "width=1000,height=850,resizable=yes,scrollbars=yes");
+
             var data = tournamentLevels[currentLvlIdx];
-            var pList = players.map(function(p, i) { return { name: p.name, pos: posShort[(i - (dealerIndex - 3) + 6) % 6], stack: p.stack}; });
+            var posMap = getPositionMap();
+            var pList = players.map(function(p, i) {
+                return {
+                    name: p.name,
+                    pos: posMap[i].short,
+                    posFull: posMap[i].full,
+                    stack: p.stack,
+                    busted: p.stack <= 0
+                };
+            });
 
             var content = '<html><head><title>Runde</title><style>body{background:#1a1a1a;color:white;font-family:sans-serif;padding:20px;user-select:none;}.header{font-size:40px;color:#ffcc00;text-align:center;font-weight:bold;margin-bottom:20px;text-transform:uppercase;}.row{display:grid;grid-template-columns:220px 1fr 150px;align-items:center;gap:20px;background:#262626;padding:15px;margin-bottom:10px;border-radius:10px;}.chips{display:flex;gap:12px;justify-content:center;}.chip-wrap{position:relative;}.chip{width:65px;height:65px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;border:3px dashed rgba(255,255,255,0.2);cursor:pointer;}.c10{background:#eee;color:#111;}.c20{background:#a00;color:#fff;}.c50{background:#060;color:#fff;}.c100{background:#006;color:#fff;}.c500{background:#111;color:#fff;border-color:#444;}.count{position:absolute;top:-10px;right:-5px;background:#ffcc00;color:#000;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;border:2px solid:#1a1a1a;}.val{font-size:32px;font-weight:bold;color:#ffcc00;text-align:right;}.nav{display:flex;justify-content:space-between;align-items:center;margin-top:30px;}button{padding:18px 40px;border-radius:10px;border:none;cursor:pointer;font-weight:bold;font-size:20px;color:white;}</style></head><body><div id="ui"></div><script>' +
             'var state = []; var stepIdx = 0; var curSB = 0; var curBB = 0; var chipVals = [10, 20, 50, 100, 500];' +
             'window.updateBlinds = function(sb, bb) { curSB = sb; curBB = bb; if(stepIdx === 0) resetRound(); };' +
-            'window.updateData = function(list, sb, bb) { curSB = sb; curBB = bb; state = list.map(function(p){ return {name:p.name, pos:p.pos, stack:p.stack || 0, roundBet:0, stepBet:0, isWinner:false, stepChips:{10:0,20:0,50:0,100:0,500:0}}; }); resetRound(); };' +
-            'function resetRound() { stepIdx = 0; state.forEach(function(p){ p.roundBet = 0; p.stepBet = 0; p.isWinner = false; p.stepChips = {10:0,20:0,50:0,100:0,500:0}; if(p.pos==="SB"){p.roundBet=curSB;p.stepBet=curSB;p.stepChips[curSB]=(p.stepChips[curSB]||0)+1;} if(p.pos==="BB"){p.roundBet=curBB;p.stepBet=curBB;p.stepChips[curBB]=(p.stepChips[curBB]||0)+1;} }); render(); }' +
-            'function assign(p, val) { }' +
-            'window.doAdd = function(i, v) { var p = state[i]; var remaining = p.stack - p.roundBet; if (remaining <= 0) return; var addAmount = Math.min(v, remaining); p.stepBet += addAmount; p.roundBet += addAmount; p.stepChips[v]++; render(); };' +                
-            'window.doRem = function(e, i, v) { e.preventDefault(); if(state[i].stepChips[v]>0){ state[i].stepBet -= v; state[i].roundBet -= v; state[i].stepChips[v]--; render(); } return false; };' +
+            'window.updateData = function(list, sb, bb) {' +
+            '    curSB = sb; curBB = bb;' +
+            '    state = list.map(function(p){' +
+            '        return {' +
+            '            name: p.name,' +
+            '            pos: p.pos,' +
+            '            posFull: p.posFull || p.pos,' +
+            '            stack: p.stack || 0,' +
+            '            busted: !!p.busted,' +
+            '            roundBet: 0,' +
+            '            stepBet: 0,' +
+            '            isWinner: false,' +
+            '            stepChips: {10:0,20:0,50:0,100:0,500:0}' +
+            '        };' +
+            '    });' +
+            '    resetRound();' +
+            '};' +
+            'function resetRound() {' +
+            '    stepIdx = 0;' +
+            '    state.forEach(function(p){' +
+            '        p.roundBet = 0;' +
+            '        p.stepBet = 0;' +
+            '        p.isWinner = false;' +
+            '        p.stepChips = {10:0,20:0,50:0,100:0,500:0};' +
+            '        if (p.busted) return;' +
+            '        if (p.pos === "SB") {' +
+            '            p.roundBet = Math.min(curSB, p.stack);' +
+            '            p.stepBet = Math.min(curSB, p.stack);' +
+            '            if (curSB > 0 && p.stepChips.hasOwnProperty(curSB)) p.stepChips[curSB] = (p.stepChips[curSB] || 0) + 1;' +
+            '        }' +
+            '        if (p.pos === "BB") {' +
+            '            p.roundBet = Math.min(curBB, p.stack);' +
+            '            p.stepBet = Math.min(curBB, p.stack);' +
+            '            if (curBB > 0 && p.stepChips.hasOwnProperty(curBB)) p.stepChips[curBB] = (p.stepChips[curBB] || 0) + 1;' +
+            '        }' +
+            '    });' +
+            '    render();' +
+            '}' +
+            'window.doAdd = function(i, v) {' +
+            '    var p = state[i];' +
+            '    if (p.busted) return;' +
+            '    var remaining = p.stack - p.roundBet;' +
+            '    if (remaining <= 0) return;' +
+            '    var addAmount = Math.min(v, remaining);' +
+            '    p.stepBet += addAmount;' +
+            '    p.roundBet += addAmount;' +
+            '    p.stepChips[v]++;' +
+            '    render();' +
+            '};' +
+            'window.doRem = function(e, i, v) {' +
+            '    e.preventDefault();' +
+            '    var p = state[i];' +
+            '    if (p.busted) return false;' +
+            '    if(state[i].stepChips[v]>0){ state[i].stepBet -= v; state[i].roundBet -= v; state[i].stepChips[v]--; render(); } return false;' +
+            '};' +
             'window.doStep = function(dir) { if(stepIdx === 4 && dir === 1) { window.opener.finalizeRound(state); resetRound(); return; } if(stepIdx === 0 && dir === -1) return; stepIdx += dir; state.forEach(function(p){ p.stepBet = 0; p.stepChips = {10:0,20:0,50:0,100:0,500:0}; }); render(); };' +
-            'function render() { var pot = 0; state.forEach(function(p){ pot += p.roundBet; }); if(window.opener) window.opener.updatePotRealtime(pot); var h = "<div class=\'header\'>" + ["PREFLOP", "FLOP", "TURN", "RIVER", "VELG VINNER"][stepIdx] + "</div>";' +
-            'state.forEach(function(p, i) { if(stepIdx < 4) { h += "<div class=\'row\'><div><b style=\'color:#ffcc00\'>["+p.pos+"]</b> "+p.name+"</div><div class=\'chips\'>"; chipVals.forEach(function(v) { h += "<div class=\'chip-wrap\'>" + (p.stepChips[v]>0 ? "<div class=\'count\'>"+p.stepChips[v]+"</div>" : "") + "<div class=\'chip c"+v+"\' onclick=\'doAdd("+i+","+v+")\' oncontextmenu=\'return doRem(event,"+i+","+v+")\'>"+v+"</div></div>"; }); h += "</div><div class=\'val\'>"+p.stepBet+"</div></div>"; }' +
-            'else { h += "<div class=\'row\'><div><b style=\'font-size:24px\'>"+p.name+"</b></div><div></div><div style=\'text-align:right\'>VINNER? <input type=\'checkbox\' style=\'width:35px;height:35px\' "+(p.isWinner?"checked":"")+" onchange=\'state["+i+"].isWinner=this.checked\'></div></div>"; } });' +
-            'h += "<div class=\'nav\'><button style=\'background:#444\' onclick=\'doStep(-1)\'>TILBAKE</button><div style=\'font-size:45px; font-weight:bold; color:#ffcc00\'>POTT: "+pot+"</div><button style=\'background:"+(stepIdx<4?"#1565c0":"#c62828")+"\' onclick=\'doStep(1)\'>"+(stepIdx<4?"NESTE":"AVSLUTT")+"</button></div>"; document.getElementById("ui").innerHTML = h; }' +
+            'function render() { var pot = 0; state.forEach(function(p){ pot += p.roundBet; }); if(window.opener) window.opener.updatePotRealtime(pot); var h = "<div class=\\'header\\'>" + ["PREFLOP", "FLOP", "TURN", "RIVER", "VELG VINNER"][stepIdx] + "</div>";' +
+            'state.forEach(function(p, i) {' +
+            'if(stepIdx < 4) {' +
+            '   if (p.busted) {' +
+            '       h += "<div class=\\'row\\' style=\\'opacity:0.35\\'><div><b style=\\'color:#ff5252\\'>[OUT]</b> " + p.name + "</div><div></div><div class=\\'val\\'>0</div></div>";' +
+            '   } else {' +
+            '       h += "<div class=\\'row\\'><div><b style=\\'color:#ffcc00\\'>[" + p.pos + "]</b> " + p.name + "</div><div class=\\'chips\\'>";' +
+            '       chipVals.forEach(function(v) { h += "<div class=\\'chip-wrap\\'>" + (p.stepChips[v]>0 ? "<div class=\\'count\\'>"+p.stepChips[v]+"</div>" : "") + "<div class=\\'chip c"+v+"\\' onclick=\\'doAdd("+i+","+v+")\\' oncontextmenu=\\'return doRem(event,"+i+","+v+")\\'>"+v+"</div></div>"; });' +
+            '       h += "</div><div class=\\'val\\'>"+p.stepBet+"</div></div>";' +
+            '   }' +
+            '}' +
+            'else {' +
+            '   if (p.busted) {' +
+            '       h += "<div class=\\'row\\' style=\\'opacity:0.35\\'><div><b style=\\'font-size:24px\\'>"+p.name+"</b></div><div></div><div style=\\'text-align:right;color:#ff5252;font-weight:bold\\'>SLÅTT UT</div></div>";' +
+            '   } else {' +
+            '       h += "<div class=\\'row\\'><div><b style=\\'font-size:24px\\'>[" + p.pos + "] " + p.name + "</b></div><div></div><div style=\\'text-align:right\\'>VINNER? <input type=\\'checkbox\\' style=\\'width:35px;height:35px\\' "+(p.isWinner?"checked":"")+" onchange=\\'state["+i+"].isWinner=this.checked\\'></div></div>";' +
+            '   }' +
+            '}' +
+            '});' +
+            'h += "<div class=\\'nav\\'><button style=\\'background:#444\\' onclick=\\'doStep(-1)\\'>TILBAKE</button><div style=\\'font-size:45px; font-weight:bold; color:#ffcc00\\'>POTT: "+pot+"</div><button style=\\'background:"+(stepIdx<4?"#1565c0":"#c62828")+"\\' onclick=\\'doStep(1)\\'>"+(stepIdx<4?"NESTE":"AVSLUTT")+"</button></div>"; document.getElementById("ui").innerHTML = h; }' +
             'window.updateData(' + JSON.stringify(pList) + ',' + data.sb + ',' + data.bb + ');' +
             '<\/script></body></html>';
+
             popupWindow.document.write(content);
             popupWindow.document.close();
         }
 
         window.updatePotRealtime = function(val) { document.getElementById("main-pot-display").innerText = "POT: " + val; };
+
         window.finalizeRound = function(st) {
             players.forEach(function(p, i) {
                 p.stack -= st[i].roundBet;
+                if (p.stack < 0) p.stack = 0;
             });
 
-            var sorted = st.map((p, i) => ({...p, index: i}))
-                   .sort((a,b) => a.roundBet - b.roundBet);
+            var sorted = st.map(function(p, i) {
+                var copy = {};
+                for (var k in p) copy[k] = p[k];
+                copy.index = i;
+                return copy;
+            }).sort(function(a,b) {
+                return a.roundBet - b.roundBet;
+            });
 
             var prev = 0;
         
@@ -259,30 +501,34 @@
                 var potSize = (level - prev) * contributors.length;
                 if (potSize <= 0) continue;
         
-                var winners = sorted.filter(p => p.isWinner);
+                var winners = sorted.filter(function(p) { return p.isWinner; });
                 
-                var winner = winners.find(w => contributors.includes(w));
+                var winner = winners.find(function(w) {
+                    return contributors.some(function(c) { return c.index === w.index; });
+                });
                 
                 if (winner) {
                     players[winner.index].stack += potSize;
-                
                     winner.isWinner = false;
                 }
         
                 prev = level;
             }
-            
-            dealerIndex = (dealerIndex + 1) % 6;
+
+            advanceDealerButton();
             updateStackDisplay();
             document.getElementById("main-pot-display").innerText = "POT: 0";
 
             if (popupWindow && !popupWindow.closed) {
                 var data = tournamentLevels[currentLvlIdx];
+                var posMap = getPositionMap();
                 var list = players.map(function(p, idx){ 
                     return { 
-                        name: p.name, 
-                        pos: posShort[(idx - (dealerIndex - 3) + 6) % 6],
-                        stack: p.stack // 🔥 viktig
+                        name: p.name,
+                        pos: posMap[idx].short,
+                        posFull: posMap[idx].full,
+                        stack: p.stack,
+                        busted: p.stack <= 0
                     }; 
                 });
             
@@ -294,13 +540,14 @@
             var svg = document.getElementById("svg-container"); svg.innerHTML = "";
             for (var i = 0; i < 60; i++) {
                 var angle = (i * 6 - 90) * Math.PI / 180;
-                var r = document.createElementNS("http://w3.org", "rect");
+                var r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
                 var x = 100 + 85 * Math.cos(angle); var y = 100 + 85 * Math.sin(angle);
                 r.setAttribute("x", x-1.5); r.setAttribute("y", y-5); r.setAttribute("width", "3"); r.setAttribute("height", "12");
                 r.setAttribute("fill", "#2a2a2a"); r.setAttribute("transform", "rotate(" + (i*6) + "," + x + "," + y + ")");
                 r.setAttribute("id", "r-" + i); svg.appendChild(r);
             }
         }
+
         function updateDisplay() {
             var m = Math.floor(timeLeft / 60); var s = timeLeft % 60;
             document.getElementById("timer").innerText = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
@@ -308,10 +555,31 @@
             var f = Math.floor(((total - timeLeft) / total) * 60);
             for(var i=0; i<60; i++) { var el = document.getElementById("r-" + i); if(el) el.setAttribute("fill", i < f ? "#8b0000" : "#2a2a2a"); }
         }
+
         function toggleTimer() {
             var b = document.getElementById("startBtn");
-            if (timerId) { clearInterval(timerId); timerId = null; b.innerText = "START"; }
-            else { b.innerText = "PAUSE"; timerId = setInterval(function() { if (timeLeft > 0) { timeLeft--; updateDisplay(); } else { currentLvlIdx++; if(currentLvlIdx < tournamentLevels.length) { setupLevel(); new Audio("https://google.com").play(); } } }, 1000); }
+            if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+                b.innerText = "START";
+            } else {
+                b.innerText = "PAUSE";
+                timerId = setInterval(function() {
+                    if (timeLeft > 0) {
+                        timeLeft--;
+                        updateDisplay();
+                    } else {
+                        currentLvlIdx++;
+                        if(currentLvlIdx < tournamentLevels.length) {
+                            setupLevel();
+                        } else {
+                            clearInterval(timerId);
+                            timerId = null;
+                            b.innerText = "START";
+                        }
+                    }
+                }, 1000);
+            }
         }
 
         function openStackEditor() {
@@ -324,15 +592,17 @@
             document.getElementById("stack-modal").classList.remove("hidden");
         }
 
-         function closeStackEditor() {
+        function closeStackEditor() {
             document.getElementById("stack-modal").classList.add("hidden");
-        }   
+        }
 
         function saveStacks() {
             for (var i = 0; i < players.length; i++) {
                 var val = parseInt(document.getElementById("stack-" + i).value) || 0;
                 players[i].stack = val;
             }
+
+            normalizeDealerIndex();
             updateStackDisplay();
             closeStackEditor();
         }
@@ -344,7 +614,6 @@
                 row.querySelector(".sb-cell").innerText = Math.floor(bb / 2);
             }
         });
-
     </script>
 </body>
 </html>
