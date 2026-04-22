@@ -1069,6 +1069,7 @@
 
     function renderPositions() {
       els.positionsGrid.innerHTML = '';
+      const currentBb = getCurrentLevel().bb || 1;
       state.players.forEach((player) => {
         const card = document.createElement('div');
         card.className = `position-card ${player.eliminated ? 'eliminated' : ''} ${player.currentPosition === 'Dealer' ? 'dealer-highlight' : ''}`;
