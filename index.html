@@ -1076,6 +1076,7 @@
           <div class="pos-name">${player.eliminated ? 'Slått ut' : player.currentPosition === 'Dealer' ? '<span style="color: #3abf7a;">Dealer</span>' : player.currentPosition}</div>
           <div style="font-weight: 800;">${escapeHtml(player.name)}</div>
           <div class="small-note">Stack: ${formatNumber(player.chips)}</div>
+          <div class="small-note">${player.chips > 0 ? Math.floor(player.chips / currentBb) : 0} BB</div>
           ${player.currentPosition === 'Dealer' && !player.eliminated ? '<div class="small-note"> </div>' : ''}
         `;
         els.positionsGrid.appendChild(card);
