@@ -882,6 +882,8 @@
       handState: null,
     };
 
+    let wakeLock = null;
+
     const els = {
       setupPage: document.getElementById('setupPage'),
       timerPage: document.getElementById('timerPage'),
@@ -1018,6 +1020,7 @@
       renderTimerScreen();
       switchPage('timer');
       startTimerLoop();
+      requestWakeLock();
     }
 
     function switchPage(page) {
@@ -1116,6 +1119,47 @@
       });
     }
 
+
+    async function requestWakeLock() {
+      if (!('wakeLock' in navigator)) {
+        console.warn('Wake Lock støttes ikke i denne nettleseren.');
+        return;
+      }
+
+      if (wakeLock) return;
+
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+
+        wakeLock.addEventListener('release', () => {
+          wakeLock = null;
+          console.log('Wake Lock ble sluppet av systemet.');
+        });
+
+        console.log('Wake Lock aktiv.');
+      } catch (err) {
+        console.warn(`Wake Lock feilet: ${err.name} - ${err.message}`);
+      }
+    }
+
+    async function releaseWakeLock() {
+      if (!wakeLock) return;
+
+      try {
+        await wakeLock.release();
+      } catch (err) {
+        console.warn(`Kunne ikke slippe Wake Lock: ${err.name} - ${err.message}`);
+      } finally {
+        wakeLock = null;
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && state.timerRunning) {
+        requestWakeLock();
+      }
+    });
+
     function startTimerLoop() {
       clearInterval(state.timerInterval);
 
@@ -1156,6 +1200,7 @@
         state.timeRemainingSec = 0;
         state.levelEndsAt = null;
         state.timerRunning = false;
+        releaseWakeLock();
       }
 
       renderTimerScreen();
@@ -1176,9 +1221,13 @@
         updateTimeRemainingFromClock();
         state.timerRunning = false;
         state.levelEndsAt = null;
+
+        // Wake Lock beholdes aktiv selv om turneringen pauses,
+        // slik at skjermen fortsatt holdes våken.
       } else {
         state.levelEndsAt = Date.now() + state.timeRemainingSec * 1000;
         state.timerRunning = true;
+        requestWakeLock();
       }
 
       renderTimerScreen();
@@ -1203,6 +1252,7 @@
 
     function resetTournament() {
       clearInterval(state.timerInterval);
+      releaseWakeLock();
       state.roundWindowRef?.close?.();
       state.roundWindowRef = null;
       state.players = [];
