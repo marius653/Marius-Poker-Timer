@@ -24,7 +24,6 @@
       --radius-sm: 12px;
     }
 
-    
     * { box-sizing: border-box; }
     html, body { min-height: 100%; }
     body {
@@ -249,7 +248,7 @@
     .level-card {
       padding: 18px 30px;
       min-height: 250px;
-      display: inline.flex;
+      display: inline-flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
@@ -267,13 +266,13 @@
       margin-bottom: 12px;
     }
 
-        .blind-line {
+    .blind-line {
       font-size: clamp(6rem, 2.4vw, 2rem);
       font-weight: 700;
     }
 
     .duration-text {
-  	  font-size: clamp(0.9rem, 1.5vw, 1.3rem);
+      font-size: clamp(0.9rem, 1.5vw, 1.3rem);
     }
 
     .timer-stage {
@@ -348,9 +347,7 @@
       letter-spacing: 0.02em;
     }
 
-    
     .pot-label { font-size: 0.9rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0px; margin-bottom: 0px; } 
-
     .pot-value { font-size: 4rem; font-weight: 800; margin-top: 0px; }
 
     .chips-hero {
@@ -371,7 +368,7 @@
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 16px;
     }
-        
+
     .stacks-board {
       margin-top: 18px;
       padding: 18px;
@@ -875,6 +872,7 @@
       startStack: 2500,
       currentLevelIndex: 0,
       timeRemainingSec: 0,
+      levelEndsAt: null,
       timerRunning: true,
       timerInterval: null,
       currentPot: 0,
@@ -1014,6 +1012,7 @@
       state.dealerIndex = count - 1;
       state.timerRunning = true;
       state.timeRemainingSec = getCurrentLevel().duration * 60;
+      state.levelEndsAt = Date.now() + state.timeRemainingSec * 1000;
       applyPositionsForRound();
       ensureHandStateInitialized();
       renderTimerScreen();
@@ -1119,26 +1118,70 @@
 
     function startTimerLoop() {
       clearInterval(state.timerInterval);
+
       state.timerInterval = setInterval(() => {
-        if (!state.timerRunning) return;
-        state.timeRemainingSec -= 1;
-        if (state.timeRemainingSec <= 0) {
-          if (state.currentLevelIndex < state.blinds.length - 1) {
-            state.currentLevelIndex += 1;
-            state.timeRemainingSec = getCurrentLevel().duration * 60;
-          } else {
-            state.timeRemainingSec = 0;
-            state.timerRunning = false;
-          }
-        }
-        renderTimerScreen();
-        updateStartPauseLabel();
-      }, 1000);
+        handleTimerTick();
+      }, 250);
+
+      handleTimerTick();
       updateStartPauseLabel();
     }
 
+    function handleTimerTick() {
+      if (!state.timerRunning) return;
+
+      const now = Date.now();
+
+      if (!state.levelEndsAt) {
+        state.levelEndsAt = now + state.timeRemainingSec * 1000;
+      }
+
+      while (
+        state.levelEndsAt <= now &&
+        state.currentLevelIndex < state.blinds.length - 1
+      ) {
+        state.currentLevelIndex += 1;
+        state.levelEndsAt += getCurrentLevel().duration * 60 * 1000;
+      }
+
+      state.timeRemainingSec = Math.max(
+        0,
+        Math.ceil((state.levelEndsAt - now) / 1000)
+      );
+
+      if (
+        state.timeRemainingSec <= 0 &&
+        state.currentLevelIndex >= state.blinds.length - 1
+      ) {
+        state.timeRemainingSec = 0;
+        state.levelEndsAt = null;
+        state.timerRunning = false;
+      }
+
+      renderTimerScreen();
+      updateStartPauseLabel();
+    }
+
+    function updateTimeRemainingFromClock() {
+      if (!state.levelEndsAt) return;
+
+      state.timeRemainingSec = Math.max(
+        0,
+        Math.ceil((state.levelEndsAt - Date.now()) / 1000)
+      );
+    }
+
     function toggleTimer() {
-      state.timerRunning = !state.timerRunning;
+      if (state.timerRunning) {
+        updateTimeRemainingFromClock();
+        state.timerRunning = false;
+        state.levelEndsAt = null;
+      } else {
+        state.levelEndsAt = Date.now() + state.timeRemainingSec * 1000;
+        state.timerRunning = true;
+      }
+
+      renderTimerScreen();
       updateStartPauseLabel();
     }
 
@@ -1152,6 +1195,9 @@
       if (nextIndex === state.currentLevelIndex) return;
       state.currentLevelIndex = nextIndex;
       state.timeRemainingSec = getCurrentLevel().duration * 60;
+      state.levelEndsAt = state.timerRunning
+        ? Date.now() + state.timeRemainingSec * 1000
+        : null;
       renderTimerScreen();
     }
 
@@ -1162,6 +1208,7 @@
       state.players = [];
       state.blinds = [];
       state.currentPot = 0;
+      state.levelEndsAt = null;
       state.handState = null;
       switchPage('setup');
     }
