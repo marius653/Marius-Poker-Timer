@@ -232,8 +232,9 @@
     }
     
     .top-bar-three {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      position: relative;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
     }
     
@@ -242,7 +243,9 @@
     }
     
     .top-center-actions {
-      justify-self: center;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
     
     .top-right-actions {
