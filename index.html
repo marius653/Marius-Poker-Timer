@@ -520,6 +520,142 @@
       justify-content: flex-end;
     }
 
+
+    .hand-rankings-modal {
+      width: min(1550px, 98vw);
+      max-height: 94vh;
+      overflow: auto;
+      padding: 34px;
+      background:
+        linear-gradient(135deg, rgba(31, 35, 42, 0.98), rgba(18, 21, 27, 0.98));
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 82px rgba(0,0,0,0.62);
+    }
+
+    .hand-rankings-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .hand-rankings-head h2 {
+      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: clamp(2rem, 2.4vw, 3.2rem);
+    }
+
+    .hand-rankings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(520px, 1fr));
+      grid-template-rows: repeat(5, auto);
+      grid-auto-flow: column;
+      gap: 20px;
+    }
+
+    .hand-rank-card {
+      display: grid;
+      grid-template-columns: 74px 1fr auto;
+      gap: 20px;
+      align-items: center;
+      padding: 22px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+    }
+
+    .hand-rank-number {
+      width: 58px;
+      height: 58px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(214,64,69,0.22);
+      border: 1px solid rgba(214,64,69,0.38);
+      font-weight: 900;
+      font-size: 1.35rem;
+      color: #ffd7d8;
+    }
+
+    .hand-rank-title {
+      font-weight: 900;
+      font-size: clamp(1.25rem, 1.4vw, 1.85rem);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .hand-rank-desc {
+      color: var(--muted);
+      font-size: clamp(1rem, 1vw, 1.25rem);
+      line-height: 1.35;
+    }
+
+    .playing-cards {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      align-items: center;
+      min-width: 282px;
+    }
+
+    .mini-card {
+      width: 50px;
+      height: 70px;
+      border-radius: 9px;
+      background: #f5f5f5;
+      color: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.25rem;
+      box-shadow: 0 9px 16px rgba(0,0,0,0.28);
+      border: 1px solid rgba(0,0,0,0.12);
+    }
+
+    .mini-card.red-suit {
+      color: #c32735;
+    }
+
+    .mini-card.dark-suit {
+      color: #111;
+    }
+
+    .mini-card.kicker {
+      background: #d7dbe2;
+      color: #6f7783;
+      border-color: rgba(0,0,0,0.08);
+      box-shadow: 0 7px 14px rgba(0,0,0,0.18);
+      filter: saturate(0.2);
+      opacity: 0.78;
+    }
+
+    .mini-card.kicker.red-suit,
+    .mini-card.kicker.dark-suit {
+      color: #6f7783;
+    }
+
+    @media (max-width: 1100px) {
+      .hand-rankings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hand-rank-card {
+        grid-template-columns: 64px 1fr;
+      }
+
+      .playing-cards {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+      }
+    }
+
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -796,6 +932,7 @@
           <div class="button-cluster">
             <button id="levelDownBtn" class="btn btn-gray">&larr; Level</button>
             <button id="levelUpBtn" class="btn btn-gray">Level &rarr;</button>
+            <button id="showHandsBtn" class="btn btn-blue">Vis hender</button>
           </div>
           <div class="button-cluster">
             <button id="resetBtn" class="btn btn-danger">Avslutt</button>
@@ -882,6 +1019,103 @@
       <div id="editStacksGrid" class="edit-grid"></div>
       <div class="footer-actions" style="justify-content: flex-end;">
         <button id="saveStacksBtn" class="btn btn-primary">Lagre</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="handRankingsModalBackdrop" class="modal-backdrop">
+    <div class="hand-rankings-modal">
+      <div class="hand-rankings-head">
+        <div>
+          <h2>Poker Hand Rankings</h2>
+          <p class="muted"> </p>
+        </div>
+        <button id="closeHandRankingsBtn" class="btn btn-gray btn-small">Lukk</button>
+      </div>
+
+      <div class="hand-rankings-grid">
+
+        <div class="hand-rank-card">
+          <div class="hand-rank-number">1</div>
+          <div>
+            <div class="hand-rank-title">Royal Flush</div>
+            <div class="hand-rank-desc">A, K, Q, J, 10 i samme sort.</div>
+          </div>
+          <div class="playing-cards"><div class="mini-card red-suit">A♥</div><div class="mini-card red-suit">K♥</div><div class="mini-card red-suit">Q♥</div><div class="mini-card red-suit">J♥</div><div class="mini-card red-suit">10♥</div></div>
+        </div>
+        <div class="hand-rank-card">
+          <div class="hand-rank-number">2</div>
+          <div>
+            <div class="hand-rank-title">Straight Flush</div>
+            <div class="hand-rank-desc">Fem kort i rekkefølge, samme sort.</div>
+          </div>
+          <div class="playing-cards"><div class="mini-card dark-suit">9♠</div><div class="mini-card dark-suit">8♠</div><div class="mini-card dark-suit">7♠</div><div class="mini-card dark-suit">6♠</div><div class="mini-card dark-suit">5♠</div></div>
+        </div>
+        <div class="hand-rank-card">
+          <div class="hand-rank-number">3</div>
+          <div>
+            <div class="hand-rank-title">Four of a Kind</div>
+            <div class="hand-rank-desc">Fire like.</div>
+          </div>
+          <div class="playing-cards"><div class="mini-card red-suit">Q♥</div><div class="mini-card dark-suit">Q♠</div><div class="mini-card red-suit">Q♦</div><div class="mini-card dark-suit">Q♣</div><div class="mini-card kicker dark-suit">3♠</div></div>
+        </div>
+        <div class="hand-rank-card">
+          <div class="hand-rank-number">4</div>
+          <div>
+            <div class="hand-rank-title">Full House</div>
+            <div class="hand-rank-desc">Tre like + ett par.</div>
+          </div>
+          <div class="playing-cards"><div class="mini-card red-suit">J♥</div><div class="mini-card dark-suit">J♠</div><div class="mini-card red-suit">J♦</div><div class="mini-card dark-suit">7♣</div><div class="mini-card red-suit">7♥</div></div>
+        </div>
+        <div class="hand-rank-card">
+          <div class="hand-rank-number">5</div>
+          <div>
+            <div class="hand-rank-title">Flush</div>
+            <div class="hand-rank-desc">Fem kort i samme sort.</div>
+          </div>
+          <div class="playing-cards"><div class="mini-card dark-suit">A♣</div><div class="mini-card dark-suit">10♣</div><div class="mini-card dark-suit">8♣</div><div class="mini-card dark-suit">4♣</div><div class="mini-card dark-suit">2♣</div></div>
+        </div>
+        <div class="hand-rank-card">
+          <div class="hand-rank-number">6</div>
+          <div>
+            <div class="hand-rank-title">Straight</div>
+            <div class="hand-rank-desc">Fem kort i rekkefølge.</div>
+          </div>
+          <div class="playing-cards"><div class="mini-card red-suit">10♥</div><div class="mini-card dark-suit">9♣</div><div class="mini-card red-suit">8♦</div><div class="mini-card dark-suit">7♠</div><div class="mini-card red-suit">6♥</div></div>
+        </div>
+        <div class="hand-rank-card">
+          <div class="hand-rank-number">7</div>
+          <div>
+            <div class="hand-rank-title">Three of a Kind</div>
+            <div class="hand-rank-desc">Tre like.</div>
+          </div>
+          <div class="playing-cards"><div class="mini-card red-suit">8♥</div><div class="mini-card dark-suit">8♠</div><div class="mini-card red-suit">8♦</div><div class="mini-card kicker dark-suit">K♣</div><div class="mini-card kicker red-suit">4♥</div></div>
+        </div>
+        <div class="hand-rank-card">
+          <div class="hand-rank-number">8</div>
+          <div>
+            <div class="hand-rank-title">Two Pair</div>
+            <div class="hand-rank-desc">To par.</div>
+          </div>
+          <div class="playing-cards"><div class="mini-card red-suit">A♥</div><div class="mini-card dark-suit">A♣</div><div class="mini-card red-suit">5♦</div><div class="mini-card dark-suit">5♠</div><div class="mini-card kicker dark-suit">9♣</div></div>
+        </div>
+        <div class="hand-rank-card">
+          <div class="hand-rank-number">9</div>
+          <div>
+            <div class="hand-rank-title">One Pair</div>
+            <div class="hand-rank-desc">Ett par.</div>
+          </div>
+          <div class="playing-cards"><div class="mini-card red-suit">K♥</div><div class="mini-card dark-suit">K♣</div><div class="mini-card kicker red-suit">10♦</div><div class="mini-card kicker dark-suit">6♠</div><div class="mini-card kicker red-suit">3♥</div></div>
+        </div>
+        <div class="hand-rank-card">
+          <div class="hand-rank-number">10</div>
+          <div>
+            <div class="hand-rank-title">High Card</div>
+            <div class="hand-rank-desc">Høyeste kort teller.</div>
+          </div>
+          <div class="playing-cards"><div class="mini-card red-suit">A♦</div><div class="mini-card dark-suit">Q♣</div><div class="mini-card dark-suit">9♠</div><div class="mini-card red-suit">6♥</div><div class="mini-card dark-suit">2♣</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -975,6 +1209,7 @@
       roundCounterLabel: document.getElementById('roundCounterLabel'),
       levelDownBtn: document.getElementById('levelDownBtn'),
       levelUpBtn: document.getElementById('levelUpBtn'),
+      showHandsBtn: document.getElementById('showHandsBtn'),
       startPauseBtn: document.getElementById('startPauseBtn'),
       openRoundBtn: document.getElementById('openRoundBtn'),
       resetBtn: document.getElementById('resetBtn'),
@@ -983,6 +1218,8 @@
       editStacksGrid: document.getElementById('editStacksGrid'),
       closeEditStacksBtn: document.getElementById('closeEditStacksBtn'),
       saveStacksBtn: document.getElementById('saveStacksBtn'),
+      handRankingsModalBackdrop: document.getElementById('handRankingsModalBackdrop'),
+      closeHandRankingsBtn: document.getElementById('closeHandRankingsBtn'),
     };
 
     function init() {
@@ -1051,14 +1288,20 @@
       els.startTournamentBtn.addEventListener('click', startTournament);
       els.levelDownBtn.addEventListener('click', () => changeLevel(-1));
       els.levelUpBtn.addEventListener('click', () => changeLevel(1));
+      els.showHandsBtn.addEventListener('click', openHandRankingsModal);
       els.startPauseBtn.addEventListener('click', toggleTimer);
       els.resetBtn.addEventListener('click', resetTournament);
       els.openRoundBtn.addEventListener('click', openRoundWindow);
       els.editStacksBtn.addEventListener('click', openEditStacksModal);
       els.closeEditStacksBtn.addEventListener('click', closeEditStacksModal);
       els.saveStacksBtn.addEventListener('click', saveEditedStacks);
+      els.closeHandRankingsBtn.addEventListener('click', closeHandRankingsModal);
       els.editStacksModalBackdrop.addEventListener('click', (e) => {
         if (e.target === els.editStacksModalBackdrop) closeEditStacksModal();
+      });
+
+      els.handRankingsModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === els.handRankingsModalBackdrop) closeHandRankingsModal();
       });
     }
 
@@ -1347,6 +1590,15 @@
       state.levelEndsAt = null;
       state.handState = null;
       switchPage('setup');
+    }
+
+
+    function openHandRankingsModal() {
+      els.handRankingsModalBackdrop.classList.add('active');
+    }
+
+    function closeHandRankingsModal() {
+      els.handRankingsModalBackdrop.classList.remove('active');
     }
 
     function openEditStacksModal() {
@@ -1953,6 +2205,14 @@
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
     }
+
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeHandRankingsModal();
+        closeEditStacksModal();
+      }
+    });
 
     init();
   </script>
