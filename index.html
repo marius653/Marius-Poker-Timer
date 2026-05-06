@@ -260,7 +260,7 @@
       width: 96px;
       height: 96px;
       padding: 0;
-      border-radius: %;
+      border-radius: 50%;
       min-width: 0;
       line-height: 1;
 
@@ -315,11 +315,11 @@
     .timer-inner-play {
       position: absolute;
       left: 50%;
-      top: -10%;
+      top: -5%;
       transform: translateX(-50%);
-      width: 120px;
-      height: 60px;
-      --button-height: 1.2rem;
+      width: 58px;
+      height: 58px;
+      --button-height: 0.62rem;
       z-index: 5;
       box-shadow:
         var(--shadow),
@@ -444,7 +444,9 @@
       display: flex;
       justify-content: center;
       align-items: center;
-    }
+      cursor: pointer;
+          user-select: none;
+}
 
     .timer-segment {
       position: absolute;
@@ -463,6 +465,33 @@
       background: linear-gradient(180deg, #ff7676, #d64045);
       box-shadow: 0 0 12px rgba(214,64,69,0.28);
     }
+
+    .timer-ring-wrap {
+      cursor: pointer;
+    }
+
+    .timer-ring-wrap:hover .timer-segment {
+      filter: brightness(1.25);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.08),
+        0 0 12px rgba(255,255,255,0.12);
+    }
+
+    .timer-ring-wrap:hover .timer-segment.filled {
+      filter: brightness(1.22);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.10),
+        0 0 18px rgba(214,64,69,0.45);
+    }
+
+    .timer-ring-wrap:hover .timer-value {
+      text-shadow: 0 0 18px rgba(255,255,255,0.18);
+    }
+
+    .timer-ring-wrap:hover .timer-core {
+      filter: brightness(1.08);
+    }
+
 
     .timer-core {
       position: relative;
@@ -1407,7 +1436,11 @@
       els.levelUpBtn.addEventListener('click', () => changeLevel(1));
       els.showHandsBtn.addEventListener('click', openHandRankingsModal);
       els.editStacksTopBtn.addEventListener('click', openEditStacksModal);
-      els.startPauseBtn.addEventListener('click', toggleTimer);
+      els.startPauseBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleTimer();
+      });
+      els.timerRingWrap.addEventListener('click', toggleTimer);
       els.resetBtn.addEventListener('click', resetTournament);
       els.openRoundBtn.addEventListener('click', openRoundWindow);
       els.editStacksBtn.addEventListener('click', openEditStacksModal);
