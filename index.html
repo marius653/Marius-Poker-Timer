@@ -24,6 +24,26 @@
       --radius-sm: 12px;
     }
 
+    /* TV-MODUS: juster disse tallene hvis TV-visningen skal være større/mindre */
+    body.tv-mode {
+      --timer-scale: 1.18;
+      --ring-segment-scale: 1.12;
+      --blind-scale: 1.20;
+      --position-scale: 1.16;
+      --setup-scale: 1.08;
+      --button-scale: 1.12;
+    }
+
+    body:not(.tv-mode) {
+      --timer-scale: 1;
+      --ring-segment-scale: 1;
+      --blind-scale: 1;
+      --position-scale: 1;
+      --setup-scale: 1;
+      --button-scale: 1;
+    }
+
+
     * { box-sizing: border-box; }
     html, body { min-height: 100%; }
     body {
@@ -38,6 +58,23 @@
 
     button, input, select {
       font: inherit;
+    }
+
+
+    body.tv-mode .setup-left,
+    body.tv-mode .setup-right,
+    body.tv-mode .stack-box {
+      font-size: calc(1rem * var(--setup-scale));
+    }
+
+    body.tv-mode input,
+    body.tv-mode select {
+      font-size: calc(1rem * var(--setup-scale));
+      padding: calc(12px * var(--setup-scale)) calc(14px * var(--setup-scale));
+    }
+
+    body.tv-mode .btn:not(.btn-main-play) {
+      font-size: calc(1rem * var(--button-scale));
     }
 
     .app-shell {
@@ -364,9 +401,9 @@
       left: 50%;
       top: -2%;
       transform: translateX(-50%);
-      width: 58px;
-      height: 58px;
-      --button-height: 0.62rem;
+      width: calc(58px * var(--button-scale));
+      height: calc(58px * var(--button-scale));
+      --button-height: calc(0.62rem * var(--button-scale));
       z-index: 5;
       box-shadow:
         var(--shadow),
@@ -390,8 +427,8 @@
 
     .hero-grid {
       display: grid;
-      grid-template-columns: minmax(360px, 1fr) auto minmax(360px, 1fr);
-      column-gap: 34px;
+      grid-template-columns: minmax(calc(360px * var(--blind-scale)), 1fr) auto minmax(calc(360px * var(--blind-scale)), 1fr);
+      column-gap: calc(34px * var(--blind-scale));
       align-items: center;
       margin-top: 14px;
     }
@@ -410,9 +447,9 @@
 
 
     .level-card {
-      padding: 30px 30px;
-      min-height: 250px;
-      min-width: 360px;
+      padding: calc(30px * var(--blind-scale)) calc(30px * var(--blind-scale));
+      min-height: calc(250px * var(--blind-scale));
+      min-width: calc(360px * var(--blind-scale));
       display: inline-flex;
       flex-direction: column;
       justify-content: center;
@@ -426,9 +463,9 @@
     .level-card .eyebrow {
       text-transform: uppercase;
       letter-spacing: 0.14em;
-      font-size: 1.5rem;
+      font-size: calc(1.5rem * var(--blind-scale));
       color: var(--text);
-      margin-bottom: 30px;
+      margin-bottom: calc(30px * var(--blind-scale));
     }
 
     .blind-line {
@@ -451,7 +488,7 @@
     }
 
     .blind-label-small {
-      font-size: clamp(0.8rem, 1vw, 1.2rem);
+      font-size: clamp(calc(0.8rem * var(--blind-scale)), 1vw, calc(1.2rem * var(--blind-scale)));
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.12em;
@@ -460,13 +497,13 @@
     }
 
     .blind-number {
-      font-size: clamp(2rem, 6vw, 10rem);
+      font-size: clamp(calc(2rem * var(--blind-scale)), 6vw, calc(10rem * var(--blind-scale)));
       font-weight: 700;
       white-space: nowrap;
     }
 
     .blind-divider {
-      font-size: clamp(2rem, 5vw, 8rem);
+      font-size: clamp(calc(2rem * var(--blind-scale)), 5vw, calc(8rem * var(--blind-scale)));
       font-weight: 700;
       line-height: 1;
       color: var(--muted);
@@ -475,7 +512,7 @@
 
 
     .duration-text {
-      font-size: clamp(0.9rem, 1.5vw, 1.3rem);
+      font-size: clamp(calc(0.9rem * var(--blind-scale)), 1.5vw, calc(1.3rem * var(--blind-scale)));
     }
 
     .timer-stage {
@@ -487,22 +524,22 @@
 
     .timer-ring-wrap {
       position: relative;
-      width: min(68vw, 680px);
+      width: min(72vh, calc(680px * var(--timer-scale)));
       aspect-ratio: 1;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
-          user-select: none;
-}
+      user-select: none;
+    }
 
     .timer-segment {
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 22px;
-      height: 10px;
-      border-radius: 4px;
+      width: calc(22px * var(--ring-segment-scale));
+      height: calc(10px * var(--ring-segment-scale));
+      border-radius: calc(4px * var(--ring-segment-scale));
       background: #404752;
       transform-origin: center center;
       box-shadow: 0 0 0 1px rgba(255,255,255,0.03);
@@ -568,7 +605,7 @@
       left: 50%;
       top: 17%;
       transform: translateX(-50%);
-      font-size: clamp(1rem, 2vw, 1.4rem);
+      font-size: clamp(calc(1rem * var(--timer-scale)), 2vw, calc(1.4rem * var(--timer-scale)));
       text-transform: uppercase;
       letter-spacing: 0.16em;
       color: #ffd5d6;
@@ -581,15 +618,15 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      font-size: clamp(6rem, 8vw, 8rem);
+      font-size: clamp(calc(6rem * var(--timer-scale)), 8vw, calc(8rem * var(--timer-scale)));
       font-weight: 800;
       line-height: 0.9;
       letter-spacing: 0.02em;
       white-space: nowrap;
     }
 
-    .pot-label { font-size: 2rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0px; margin-bottom: 0px; } 
-    .pot-value { font-size: 5rem; font-weight: 800; margin-top: 0px; }
+    .pot-label { font-size: calc(2rem * var(--timer-scale)); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0px; margin-bottom: 0px; } 
+    .pot-value { font-size: calc(5rem * var(--timer-scale)); font-weight: 800; margin-top: 0px; }
 
     .timer-content > div:last-child {
       position: absolute;
@@ -602,7 +639,7 @@
 
     .chips-hero {
       margin: 12px auto 8px;
-      width: min(1080px, 120vw);
+      width: min(1120px, 118vw);
       display: block;
       opacity: 0.95;
       filter: drop-shadow(0 16px 18px rgba(0,0,0,0.3));
@@ -626,7 +663,7 @@
     }
 
     .round-label {
-      font-size: 1.2rem;
+      font-size: calc(1.2rem * var(--position-scale));
       color: var(--muted);
       font-weight: 700;
     }
@@ -634,8 +671,8 @@
     .positions-grid {
       display: grid;
       grid-auto-flow: column;
-      grid-auto-columns: clamp(180px, 14vw, 300px);
-      gap: 10px;
+      grid-auto-columns: clamp(calc(180px * var(--position-scale)), 14vw, calc(300px * var(--position-scale)));
+      gap: calc(10px * var(--position-scale));
       justify-content: center;
     }
 
@@ -650,12 +687,12 @@
       justify-content: center;
       gap: 6px;
       text-align: center;
-      font-size: clamp(1rem, 2.5vw, 2rem);
+      font-size: clamp(calc(1rem * var(--position-scale)), 2.5vw, calc(2rem * var(--position-scale)));
       width: 100%;
     }
 
     .position-card .pos-name {
-      font-size: 1.2rem;
+      font-size: calc(1.2rem * var(--position-scale));
       color: #ffd3d4;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -830,6 +867,13 @@
     }
 
     @media (max-width: 1100px) {
+      body.tv-mode {
+        --timer-scale: 1;
+        --blind-scale: 1;
+        --position-scale: 1;
+        --setup-scale: 1;
+        --button-scale: 1;
+      }
       .hand-rankings-grid {
         grid-template-columns: 1fr;
       }
@@ -841,6 +885,70 @@
       .playing-cards {
         grid-column: 1 / -1;
         justify-content: flex-start;
+      }
+    }
+
+
+    .display-settings-modal {
+      width: min(760px, 96vw);
+      padding: 24px;
+    }
+
+    .display-settings-grid {
+      display: grid;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .display-setting-row {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(220px, 1.4fr) 70px;
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .display-setting-name {
+      font-weight: 800;
+    }
+
+    .display-setting-help {
+      margin-top: 4px;
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .display-setting-row input[type="range"] {
+      padding: 0;
+      accent-color: var(--accent-2);
+    }
+
+    .display-setting-value {
+      text-align: right;
+      color: var(--muted);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .display-settings-actions {
+      margin-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 700px) {
+      .display-setting-row {
+        grid-template-columns: 1fr;
+      }
+
+      .display-setting-value {
+        text-align: left;
       }
     }
 
@@ -1043,7 +1151,7 @@
     }
 
     .small-note {
-      font-size: 2.5rem;
+      font-size: calc(2.5rem * var(--position-scale));
       color: var(--muted);
     }
 
@@ -1062,7 +1170,7 @@
     }
   </style>
 </head>
-<body>
+<body class="tv-mode">
   <div class="app-shell">
     <div id="setupPage" class="page active">
       <div class="setup-grid">
@@ -1124,9 +1232,10 @@
           </div>
 
           <div class="button-cluster top-right-actions">
-            <button id="openRoundBtn" class="btn btn-gray">Åpne rundevindu</button>
             <button id="showHandsBtn" class="btn btn-gray">Hand rankings</button>
-            <button id="editStacksTopBtn" class="btn btn-yellow">Endre stacks</button>
+            <button id="openRoundBtn" class="btn btn-gray">Åpne rundevindu</button>
+            <button id="openDisplaySettingsBtn" class="btn btn-gray">Skjerm</button>
+            <button id="editStacksTopBtn" class="btn btn-gray">Endre stacks</button>
             <button id="resetBtn" class="btn btn-danger">Avslutt</button>
           </div>
         </div>
@@ -1311,6 +1420,90 @@
     </div>
   </div>
 
+
+  <div id="displaySettingsModalBackdrop" class="modal-backdrop">
+    <div class="modal display-settings-modal">
+      <div class="utility-line">
+        <div>
+          <h3>Skjerm</h3>
+          <p class="small-note" style="font-size: 1rem;">Juster visningen live for TV, projektor eller PC. Verdiene lagres i denne nettleseren.</p>
+        </div>
+        <button id="closeDisplaySettingsBtn" class="btn btn-gray btn-small">Lukk</button>
+      </div>
+
+      <div class="display-settings-grid">
+        <div class="display-setting-row">
+          <div>
+            <div class="display-setting-name">Timer</div>
+            <div class="display-setting-help">Størrelse på selve timer-ringen og teksten inni.</div>
+          </div>
+          <input type="range" min="0.85" max="1.55" step="0.01" value="1.18" data-display-setting="timerScale" data-css-var="--timer-scale" />
+          <div class="display-setting-value" data-display-value="timerScale">1.18</div>
+        </div>
+
+        <div class="display-setting-row">
+          <div>
+            <div class="display-setting-name">Ring-streker</div>
+            <div class="display-setting-help">Tykkelse/størrelse på strekene rundt timeren.</div>
+          </div>
+          <input type="range" min="0.80" max="1.45" step="0.01" value="1.12" data-display-setting="ringSegmentScale" data-css-var="--ring-segment-scale" />
+          <div class="display-setting-value" data-display-value="ringSegmentScale">1.12</div>
+        </div>
+
+        <div class="display-setting-row">
+          <div>
+            <div class="display-setting-name">Antall streker</div>
+            <div class="display-setting-help">Flere streker gjør ringen tettere på stor skjerm.</div>
+          </div>
+          <input type="range" min="48" max="96" step="1" value="72" data-display-setting="timerSegmentCount" />
+          <div class="display-setting-value" data-display-value="timerSegmentCount">72</div>
+        </div>
+
+        <div class="display-setting-row">
+          <div>
+            <div class="display-setting-name">Blind-paneler</div>
+            <div class="display-setting-help">Størrelse på nåværende/neste level-panelene.</div>
+          </div>
+          <input type="range" min="0.85" max="1.55" step="0.01" value="1.20" data-display-setting="blindScale" data-css-var="--blind-scale" />
+          <div class="display-setting-value" data-display-value="blindScale">1.20</div>
+        </div>
+
+        <div class="display-setting-row">
+          <div>
+            <div class="display-setting-name">Posisjonskort</div>
+            <div class="display-setting-help">Størrelse på spillerkortene nederst.</div>
+          </div>
+          <input type="range" min="0.85" max="1.55" step="0.01" value="1.16" data-display-setting="positionScale" data-css-var="--position-scale" />
+          <div class="display-setting-value" data-display-value="positionScale">1.16</div>
+        </div>
+
+        <div class="display-setting-row">
+          <div>
+            <div class="display-setting-name">Setup</div>
+            <div class="display-setting-help">Størrelse på setup-skjermen.</div>
+          </div>
+          <input type="range" min="0.85" max="1.35" step="0.01" value="1.08" data-display-setting="setupScale" data-css-var="--setup-scale" />
+          <div class="display-setting-value" data-display-value="setupScale">1.08</div>
+        </div>
+
+        <div class="display-setting-row">
+          <div>
+            <div class="display-setting-name">Knapper</div>
+            <div class="display-setting-help">Generell knappestørrelse og play/pause-knappen.</div>
+          </div>
+          <input type="range" min="0.85" max="1.45" step="0.01" value="1.12" data-display-setting="buttonScale" data-css-var="--button-scale" />
+          <div class="display-setting-value" data-display-value="buttonScale">1.12</div>
+        </div>
+      </div>
+
+      <div class="display-settings-actions">
+        <button id="resetDisplaySettingsBtn" class="btn btn-gray">Nullstill skjerm</button>
+        <button id="closeDisplaySettingsBottomBtn" class="btn btn-primary">Ferdig</button>
+      </div>
+    </div>
+  </div>
+
+
   <audio id="levelUpSound" src="levelup.wav" preload="auto"></audio>
 
   <script>
@@ -1380,6 +1573,20 @@
 
     let wakeLock = null;
 
+    const DISPLAY_SETTINGS_STORAGE_KEY = 'pokerTimerDisplaySettings';
+
+    const DISPLAY_SETTINGS_DEFAULTS = {
+      timerScale: 1.18,
+      ringSegmentScale: 1.12,
+      timerSegmentCount: 72,
+      blindScale: 1.20,
+      positionScale: 1.16,
+      setupScale: 1.08,
+      buttonScale: 1.12,
+    };
+
+    let displaySettings = { ...DISPLAY_SETTINGS_DEFAULTS };
+
     const els = {
       setupPage: document.getElementById('setupPage'),
       timerPage: document.getElementById('timerPage'),
@@ -1415,6 +1622,11 @@
       saveStacksBtn: document.getElementById('saveStacksBtn'),
       handRankingsModalBackdrop: document.getElementById('handRankingsModalBackdrop'),
       closeHandRankingsBtn: document.getElementById('closeHandRankingsBtn'),
+      openDisplaySettingsBtn: document.getElementById('openDisplaySettingsBtn'),
+      displaySettingsModalBackdrop: document.getElementById('displaySettingsModalBackdrop'),
+      closeDisplaySettingsBtn: document.getElementById('closeDisplaySettingsBtn'),
+      closeDisplaySettingsBottomBtn: document.getElementById('closeDisplaySettingsBottomBtn'),
+      resetDisplaySettingsBtn: document.getElementById('resetDisplaySettingsBtn'),
     };
 
     function init() {
@@ -1422,6 +1634,7 @@
       renderBlindTable(DEFAULT_BLINDS);
       els.playerCount.value = '5';
       renderPlayerInputs(5);
+      loadDisplaySettings();
       createTimerSegments();
       attachEvents();
     }
@@ -1485,6 +1698,10 @@
       els.levelUpBtn.addEventListener('click', () => changeLevel(1));
       els.showHandsBtn.addEventListener('click', openHandRankingsModal);
       els.editStacksTopBtn.addEventListener('click', openEditStacksModal);
+      els.openDisplaySettingsBtn.addEventListener('click', openDisplaySettingsModal);
+      els.closeDisplaySettingsBtn.addEventListener('click', closeDisplaySettingsModal);
+      els.closeDisplaySettingsBottomBtn.addEventListener('click', closeDisplaySettingsModal);
+      els.resetDisplaySettingsBtn.addEventListener('click', resetDisplaySettings);
       els.startPauseBtn.addEventListener('click', (event) => {
         event.stopPropagation();
         toggleTimer();
@@ -1503,6 +1720,95 @@
       els.handRankingsModalBackdrop.addEventListener('click', (e) => {
         if (e.target === els.handRankingsModalBackdrop) closeHandRankingsModal();
       });
+
+      els.displaySettingsModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === els.displaySettingsModalBackdrop) closeDisplaySettingsModal();
+      });
+
+      document.querySelectorAll('[data-display-setting]').forEach((input) => {
+        input.addEventListener('input', handleDisplaySettingInput);
+      });
+    }
+
+
+    function loadDisplaySettings() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(DISPLAY_SETTINGS_STORAGE_KEY) || '{}');
+        displaySettings = { ...DISPLAY_SETTINGS_DEFAULTS, ...saved };
+      } catch {
+        displaySettings = { ...DISPLAY_SETTINGS_DEFAULTS };
+      }
+
+      applyDisplaySettings(false);
+      syncDisplaySettingsControls();
+    }
+
+    function saveDisplaySettings() {
+      localStorage.setItem(DISPLAY_SETTINGS_STORAGE_KEY, JSON.stringify(displaySettings));
+    }
+
+    function applyDisplaySettings(rebuildRing = true) {
+      document.body.classList.add('tv-mode');
+
+      document.body.style.setProperty('--timer-scale', displaySettings.timerScale);
+      document.body.style.setProperty('--ring-segment-scale', displaySettings.ringSegmentScale);
+      document.body.style.setProperty('--blind-scale', displaySettings.blindScale);
+      document.body.style.setProperty('--position-scale', displaySettings.positionScale);
+      document.body.style.setProperty('--setup-scale', displaySettings.setupScale);
+      document.body.style.setProperty('--button-scale', displaySettings.buttonScale);
+
+      if (rebuildRing) {
+        createTimerSegments();
+        updateTimerSegments();
+      }
+    }
+
+    function syncDisplaySettingsControls() {
+      document.querySelectorAll('[data-display-setting]').forEach((input) => {
+        const key = input.dataset.displaySetting;
+        if (!(key in displaySettings)) return;
+
+        input.value = displaySettings[key];
+        updateDisplayValueLabel(key, displaySettings[key]);
+      });
+    }
+
+    function updateDisplayValueLabel(key, value) {
+      const label = document.querySelector(`[data-display-value="${key}"]`);
+      if (!label) return;
+
+      label.textContent = key === 'timerSegmentCount'
+        ? String(Math.round(Number(value)))
+        : Number(value).toFixed(2);
+    }
+
+    function handleDisplaySettingInput(event) {
+      const input = event.currentTarget;
+      const key = input.dataset.displaySetting;
+      const value = key === 'timerSegmentCount'
+        ? Math.round(Number(input.value))
+        : Number(input.value);
+
+      displaySettings[key] = value;
+      updateDisplayValueLabel(key, value);
+      applyDisplaySettings(key === 'timerSegmentCount');
+      saveDisplaySettings();
+    }
+
+    function resetDisplaySettings() {
+      displaySettings = { ...DISPLAY_SETTINGS_DEFAULTS };
+      applyDisplaySettings(true);
+      syncDisplaySettingsControls();
+      saveDisplaySettings();
+    }
+
+    function openDisplaySettingsModal() {
+      syncDisplaySettingsControls();
+      els.displaySettingsModalBackdrop.classList.add('active');
+    }
+
+    function closeDisplaySettingsModal() {
+      els.displaySettingsModalBackdrop.classList.remove('active');
     }
 
     function startTournament() {
@@ -1556,7 +1862,8 @@
     }
 
     function createTimerSegments() {
-      const totalSegments = 60;
+      els.timerRingWrap.querySelectorAll('.timer-segment').forEach((seg) => seg.remove());
+      const totalSegments = Math.max(12, Math.round(displaySettings.timerSegmentCount || 60));
       const radius = 46;
       const center = 50;
       for (let i = 0; i < totalSegments; i++) {
@@ -2454,6 +2761,7 @@
       if (event.key === 'Escape') {
         closeHandRankingsModal();
         closeEditStacksModal();
+        closeDisplaySettingsModal();
       }
     });
 
