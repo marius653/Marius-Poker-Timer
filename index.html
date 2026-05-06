@@ -253,11 +253,13 @@
     }
     
     .btn-main-play {
-      padding: 16px 34px;
-      font-size: 1.25rem;
+      padding: 16px 100px;
+      font-size: 2.5rem;
       border-radius: 16px;
-      min-width: 150px;
+      min-width: 200px;
+      line-height: 1;
     }
+
     .button-cluster {
       display: flex;
       gap: 10px;
@@ -966,7 +968,7 @@
           <div class="button-cluster">
             <button id="levelDownBtn" class="btn btn-gray">&larr; Level</button>
             <button id="levelUpBtn" class="btn btn-gray">Level &rarr;</button>
-            <button id="showHandsBtn" class="btn btn-blue">Hand rankings</button>
+            <button id="showHandsBtn" class="btn btn-gray">Hand rankings</button>
           </div>
 
            <div class="top-center-actions">
@@ -1638,7 +1640,7 @@
     }
 
     function updateStartPauseLabel() {
-      els.startPauseBtn.textContent = state.timerRunning ? 'Pause' : 'Start';
+      els.startPauseBtn.textContent = state.timerRunning ? 'Ⅱ Pause' : '▶ Start';
       els.startPauseBtn.className = `btn btn-main-play ${state.timerRunning ? 'btn-green' : 'btn-blue'}`;
     }
 
