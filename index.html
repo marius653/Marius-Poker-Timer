@@ -239,11 +239,24 @@
 
     .hero-grid {
       display: grid;
-      grid-template-columns: minmax(220px, 1fr) minmax(460px, 1.2fr) minmax(220px, 1fr);
+      grid-template-columns: 1fr auto 1fr;
       gap: 22px;
       align-items: center;
       margin-top: 14px;
     }
+
+    .hero-grid .level-card:first-child {
+      justify-self: start;
+    }
+
+    .hero-grid .timer-stage {
+      justify-self: center;
+    }
+
+    .hero-grid .level-card:last-child {
+      justify-self: end;
+    }
+
 
     .level-card {
       padding: 18px 30px;
@@ -255,7 +268,7 @@
       text-align: center;
       max-width: none;
       width: auto;
-      margin: 0 auto;
+      margin: 0;
     }
 
     .level-card .eyebrow {
