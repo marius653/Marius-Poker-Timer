@@ -934,6 +934,7 @@
             <button id="levelDownBtn" class="btn btn-gray">&larr; Level</button>
             <button id="levelUpBtn" class="btn btn-gray">Level &rarr;</button>
             <button id="showHandsBtn" class="btn btn-blue">Vis hender</button>
+            <button id="editStacksTopBtn" class="btn btn-yellow">Endre stacks</button>
           </div>
           <div class="button-cluster">
             <button id="resetBtn" class="btn btn-danger">Avslutt</button>
@@ -1214,6 +1215,7 @@
       levelDownBtn: document.getElementById('levelDownBtn'),
       levelUpBtn: document.getElementById('levelUpBtn'),
       showHandsBtn: document.getElementById('showHandsBtn'),
+      editStacksTopBtn: document.getElementById('editStacksTopBtn'),
       startPauseBtn: document.getElementById('startPauseBtn'),
       openRoundBtn: document.getElementById('openRoundBtn'),
       resetBtn: document.getElementById('resetBtn'),
@@ -1293,6 +1295,7 @@
       els.levelDownBtn.addEventListener('click', () => changeLevel(-1));
       els.levelUpBtn.addEventListener('click', () => changeLevel(1));
       els.showHandsBtn.addEventListener('click', openHandRankingsModal);
+      els.editStacksTopBtn.addEventListener('click', openEditStacksModal);
       els.startPauseBtn.addEventListener('click', toggleTimer);
       els.resetBtn.addEventListener('click', resetTournament);
       els.openRoundBtn.addEventListener('click', openRoundWindow);
