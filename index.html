@@ -259,7 +259,7 @@
 
 
     .level-card {
-      padding: 18px 30px;
+      padding: 30px 30px;
       min-height: 250px;
       display: inline-flex;
       flex-direction: column;
@@ -443,7 +443,13 @@
       margin-top: 18px;
       padding: 18px;
     }
-
+    
+    .round-label {
+      font-size: 1.2rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    
     .positions-grid {
       display: grid;
       grid-auto-flow: column;
@@ -933,11 +939,11 @@
           <div class="button-cluster">
             <button id="levelDownBtn" class="btn btn-gray">&larr; Level</button>
             <button id="levelUpBtn" class="btn btn-gray">Level &rarr;</button>
-            <button id="openRoundBtn" class="btn btn-blue">Åpne rundevindu</button>
-            <button id="editStacksTopBtn" class="btn btn-yellow">Endre stacks</button>
             <button id="showHandsBtn" class="btn btn-blue">Hand rankings</button>
           </div>
           <div class="button-cluster">
+            <button id="openRoundBtn" class="btn btn-gray">Åpne rundevindu</button>
+            <button id="editStacksTopBtn" class="btn btn-yellow">Endre stacks</button>
             <button id="resetBtn" class="btn btn-danger">Avslutt</button>
             <button id="startPauseBtn" class="btn btn-green">Pause</button>
           </div>
@@ -975,12 +981,8 @@
         <img src="chips1.png" alt="Chips" class="chips-hero" onerror="this.style.display='none'" />
 
         <section class="position-board panel">
-          <div class="row" style="justify-content: space-between; margin-bottom: 12px;">
-            <div>
-              <h3>Posisjoner rundt bordet</h3>
-              <p class="small-note"> </p>
-            </div>
-            <div class="small-note">Runde: <span id="roundCounterLabel">1</span></div>
+          <div class="row" style="justify-content: flex-start; margin-bottom: 12px;">
+            <div class="round-label">Runde: <span id="roundCounterLabel">1</span></div>
           </div>
           <div id="positionsGrid" class="positions-grid"></div>
         </section>
