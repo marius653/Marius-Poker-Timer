@@ -968,7 +968,6 @@
           <div class="button-cluster">
             <button id="levelDownBtn" class="btn btn-gray">&larr; Level</button>
             <button id="levelUpBtn" class="btn btn-gray">Level &rarr;</button>
-            <button id="showHandsBtn" class="btn btn-gray">Hand rankings</button>
           </div>
 
            <div class="top-center-actions">
@@ -977,6 +976,7 @@
           
           <div class="button-cluster">
             <button id="openRoundBtn" class="btn btn-gray">Åpne rundevindu</button>
+            <button id="showHandsBtn" class="btn btn-gray">Hand rankings</button>
             <button id="editStacksTopBtn" class="btn btn-yellow">Endre stacks</button>
             <button id="resetBtn" class="btn btn-danger">Avslutt</button>
           </div>
@@ -1640,7 +1640,7 @@
     }
 
     function updateStartPauseLabel() {
-      els.startPauseBtn.textContent = state.timerRunning ? 'PAUSE ❚❚' : 'START ▶';
+      els.startPauseBtn.textContent = state.timerRunning ? 'PAUSE ⏸' : 'START ▶';
       els.startPauseBtn.className = `btn btn-main-play ${state.timerRunning ? 'btn-green' : 'btn-blue'}`;
     }
 
