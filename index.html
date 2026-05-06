@@ -1057,7 +1057,7 @@
           <div class="hand-rank-number">3</div>
           <div>
             <div class="hand-rank-title">Four of a Kind</div>
-            <div class="hand-rank-desc">Fire like.</div>
+            <div class="hand-rank-desc">Fire kort med samme verdi.</div>
           </div>
           <div class="playing-cards"><div class="mini-card red-suit">Q♥</div><div class="mini-card dark-suit">Q♠</div><div class="mini-card red-suit">Q♦</div><div class="mini-card dark-suit">Q♣</div><div class="mini-card kicker dark-suit">3♠</div></div>
         </div>
@@ -1073,7 +1073,7 @@
           <div class="hand-rank-number">5</div>
           <div>
             <div class="hand-rank-title">Flush</div>
-            <div class="hand-rank-desc">Fem kort i samme sort.</div>
+            <div class="hand-rank-desc">Fem kort i samme sort, ikke i rekkefølge.</div>
           </div>
           <div class="playing-cards"><div class="mini-card dark-suit">A♣</div><div class="mini-card dark-suit">10♣</div><div class="mini-card dark-suit">8♣</div><div class="mini-card dark-suit">4♣</div><div class="mini-card dark-suit">2♣</div></div>
         </div>
@@ -1081,7 +1081,7 @@
           <div class="hand-rank-number">6</div>
           <div>
             <div class="hand-rank-title">Straight</div>
-            <div class="hand-rank-desc">Fem kort i rekkefølge.</div>
+            <div class="hand-rank-desc">Fem kort i rekkefølge, blandede sorter.</div>
           </div>
           <div class="playing-cards"><div class="mini-card red-suit">10♥</div><div class="mini-card dark-suit">9♣</div><div class="mini-card red-suit">8♦</div><div class="mini-card dark-suit">7♠</div><div class="mini-card red-suit">6♥</div></div>
         </div>
@@ -1089,7 +1089,7 @@
           <div class="hand-rank-number">7</div>
           <div>
             <div class="hand-rank-title">Three of a Kind</div>
-            <div class="hand-rank-desc">Tre like.</div>
+            <div class="hand-rank-desc">Tre kort med samme verdi.</div>
           </div>
           <div class="playing-cards"><div class="mini-card red-suit">8♥</div><div class="mini-card dark-suit">8♠</div><div class="mini-card red-suit">8♦</div><div class="mini-card kicker dark-suit">K♣</div><div class="mini-card kicker red-suit">4♥</div></div>
         </div>
@@ -1097,7 +1097,7 @@
           <div class="hand-rank-number">8</div>
           <div>
             <div class="hand-rank-title">Two Pair</div>
-            <div class="hand-rank-desc">To par.</div>
+            <div class="hand-rank-desc">To forskjellige par.</div>
           </div>
           <div class="playing-cards"><div class="mini-card red-suit">A♥</div><div class="mini-card dark-suit">A♣</div><div class="mini-card red-suit">5♦</div><div class="mini-card dark-suit">5♠</div><div class="mini-card kicker dark-suit">9♣</div></div>
         </div>
@@ -1113,13 +1113,15 @@
           <div class="hand-rank-number">10</div>
           <div>
             <div class="hand-rank-title">High Card</div>
-            <div class="hand-rank-desc">Høyeste kort teller.</div>
+            <div class="hand-rank-desc">Ingen kombinasjon. Høyeste kort teller.</div>
           </div>
           <div class="playing-cards"><div class="mini-card red-suit">A♦</div><div class="mini-card dark-suit">Q♣</div><div class="mini-card dark-suit">9♠</div><div class="mini-card red-suit">6♥</div><div class="mini-card dark-suit">2♣</div></div>
         </div>
       </div>
     </div>
   </div>
+
+  <audio id="levelUpSound" src="levelup.mp3" preload="auto"></audio>
 
   <script>
     const DEFAULT_BLINDS = [
@@ -1204,6 +1206,7 @@
       timerCenterLevel: document.getElementById('timerCenterLevel'),
       timerValue: document.getElementById('timerValue'),
       potValue: document.getElementById('potValue'),
+      levelUpSound: document.getElementById('levelUpSound'),
       positionsGrid: document.getElementById('positionsGrid'),
       stackRows: document.getElementById('stackRows'),
       timerRingWrap: document.getElementById('timerRingWrap'),
@@ -1334,6 +1337,7 @@
       switchPage('timer');
       startTimerLoop();
       requestWakeLock();
+      primeLevelUpSound();
     }
 
     function switchPage(page) {
@@ -1490,6 +1494,32 @@
       }
     });
 
+
+    function primeLevelUpSound() {
+      if (!els.levelUpSound) return;
+
+      const originalVolume = els.levelUpSound.volume;
+      els.levelUpSound.volume = 0;
+      els.levelUpSound.play()
+        .then(() => {
+          els.levelUpSound.pause();
+          els.levelUpSound.currentTime = 0;
+          els.levelUpSound.volume = originalVolume;
+        })
+        .catch(() => {
+          els.levelUpSound.volume = originalVolume;
+        });
+    }
+
+    function playLevelUpSound() {
+      if (!els.levelUpSound) return;
+
+      els.levelUpSound.currentTime = 0;
+      els.levelUpSound.play().catch((err) => {
+        console.warn('Kunne ikke spille av level-lyd. Nettleseren kan ha blokkert autoplay.', err);
+      });
+    }
+
     function startTimerLoop() {
       clearInterval(state.timerInterval);
 
@@ -1510,12 +1540,19 @@
         state.levelEndsAt = now + state.timeRemainingSec * 1000;
       }
 
+      let levelChanged = false;
+
       while (
         state.levelEndsAt <= now &&
         state.currentLevelIndex < state.blinds.length - 1
       ) {
         state.currentLevelIndex += 1;
         state.levelEndsAt += getCurrentLevel().duration * 60 * 1000;
+        levelChanged = true;
+      }
+
+      if (levelChanged) {
+        playLevelUpSound();
       }
 
       state.timeRemainingSec = Math.max(
@@ -1577,6 +1614,7 @@
       state.levelEndsAt = state.timerRunning
         ? Date.now() + state.timeRemainingSec * 1000
         : null;
+      playLevelUpSound();
       renderTimerScreen();
     }
 
