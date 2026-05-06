@@ -257,6 +257,7 @@
       justify-self: end;
     }
 
+
     .level-card {
       padding: 18px 30px;
       min-height: 250px;
@@ -337,30 +338,48 @@
     }
 
     .timer-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
+      position: absolute;
+      inset: 0;
       width: 100%;
+      height: 100%;
     }
 
     .timer-level-title {
+      position: absolute;
+      left: 50%;
+      top: 18%;
+      transform: translateX(-50%);
       font-size: clamp(1rem, 2vw, 1.4rem);
       text-transform: uppercase;
       letter-spacing: 0.16em;
       color: #ffd5d6;
-      margin-top: 4px;
+      margin-top: 0;
+      white-space: nowrap;
     }
 
     .timer-value {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
       font-size: clamp(6rem, 8vw, 8rem);
       font-weight: 800;
       line-height: 0.9;
       letter-spacing: 0.02em;
+      white-space: nowrap;
     }
 
     .pot-label { font-size: 0.9rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0px; margin-bottom: 0px; } 
     .pot-value { font-size: 4rem; font-weight: 800; margin-top: 0px; }
+
+    .timer-content > div:last-child {
+      position: absolute;
+      left: 50%;
+      bottom: 14%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      text-align: center;
+    }
 
     .chips-hero {
       margin: 12px auto 8px;
@@ -761,7 +780,7 @@
                   <div id="timerCenterLevel" class="timer-level-title">LEVEL 1</div>
                   <div id="timerValue" class="timer-value">15:00</div>
                   <div>
-                    <div class="pot-label">Pot</div>
+                    <div class="pot-label">Pot oversikt</div>
                     <div id="potValue" class="pot-value">0</div>
                   </div>
                 </div>
