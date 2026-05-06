@@ -353,9 +353,27 @@
       align-items: center;
       position: relative;
 
+      background: transparent !important;
+      border: calc(3px * var(--button-scale)) solid var(--button-color);
+      color: var(--button-color);
       box-shadow:
-        var(--shadow),
-        0 0 28px rgba(255,255,255,0.20);
+        0 0 0 1px rgba(255,255,255,0.06),
+        0 0 22px color-mix(in srgb, var(--button-color) 28%, transparent);
+    }
+
+    .btn-main-play.btn-green {
+      --button-color: #62d896;
+    }
+
+    .btn-main-play.btn-blue {
+      --button-color: #82b2ff;
+    }
+
+    .btn-main-play:hover,
+    .btn-main-play:focus-visible,
+    .btn-main-play:active {
+      background: transparent !important;
+      border-color: var(--button-color);
     }
 
     .play-icon {
@@ -412,6 +430,9 @@
 
     .timer-inner-play:hover {
       transform: translateX(-50%) translateY(-1px);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.09),
+        0 0 28px color-mix(in srgb, var(--button-color) 42%, transparent);
     }
 
     .hidden {
@@ -1232,10 +1253,10 @@
           </div>
 
           <div class="button-cluster top-right-actions">
-            <button id="showHandsBtn" class="btn btn-gray">Hand rankings</button>
             <button id="openRoundBtn" class="btn btn-gray">Åpne rundevindu</button>
+            <button id="showHandsBtn" class="btn btn-gray">Hand rankings</button>
             <button id="openDisplaySettingsBtn" class="btn btn-gray">Skjerm</button>
-            <button id="editStacksTopBtn" class="btn btn-gray">Endre stacks</button>
+            <button id="editStacksTopBtn" class="btn btn-yellow">Endre stacks</button>
             <button id="resetBtn" class="btn btn-danger">Avslutt</button>
           </div>
         </div>
