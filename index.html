@@ -230,7 +230,31 @@
       margin-bottom: 10px;
       flex-wrap: wrap;
     }
-
+    
+    .top-bar-three {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+    }
+    
+    .top-left-actions {
+      justify-self: start;
+    }
+    
+    .top-center-actions {
+      justify-self: center;
+    }
+    
+    .top-right-actions {
+      justify-self: end;
+    }
+    
+    .btn-main-play {
+      padding: 16px 34px;
+      font-size: 1.25rem;
+      border-radius: 16px;
+      min-width: 150px;
+    }
     .button-cluster {
       display: flex;
       gap: 10px;
@@ -941,11 +965,15 @@
             <button id="levelUpBtn" class="btn btn-gray">Level &rarr;</button>
             <button id="showHandsBtn" class="btn btn-blue">Hand rankings</button>
           </div>
+
+           <div class="top-center-actions">
+            <button id="startPauseBtn" class="btn btn-green btn-main-play">Pause</button>
+          </div>
+          
           <div class="button-cluster">
             <button id="openRoundBtn" class="btn btn-gray">Åpne rundevindu</button>
             <button id="editStacksTopBtn" class="btn btn-yellow">Endre stacks</button>
             <button id="resetBtn" class="btn btn-danger">Avslutt</button>
-            <button id="startPauseBtn" class="btn btn-green">Pause</button>
           </div>
         </div>
 
@@ -1608,7 +1636,7 @@
 
     function updateStartPauseLabel() {
       els.startPauseBtn.textContent = state.timerRunning ? 'Pause' : 'Start';
-      els.startPauseBtn.className = `btn ${state.timerRunning ? 'btn-green' : 'btn-blue'}`;
+      els.startPauseBtn.className = `btn btn-main-play ${state.timerRunning ? 'btn-green' : 'btn-blue'}`;
     }
 
     function changeLevel(delta) {
