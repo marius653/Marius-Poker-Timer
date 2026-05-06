@@ -284,6 +284,44 @@
       font-weight: 700;
     }
 
+    .blind-split {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 28px;
+    }
+
+    .blind-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1;
+    }
+
+    .blind-label-small {
+      font-size: clamp(0.8rem, 1vw, 1.2rem);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+      white-space: nowrap;
+    }
+
+    .blind-number {
+      font-size: clamp(2rem, 6vw, 10rem);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .blind-divider {
+      font-size: clamp(2rem, 5vw, 8rem);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--muted);
+      padding-bottom: 0.03em;
+    }
+
+
     .duration-text {
       font-size: clamp(0.9rem, 1.5vw, 1.3rem);
     }
@@ -769,7 +807,7 @@
         <div class="hero-grid">
           <section class="level-card panel">
             <div class="eyebrow">Nåværende level</div>
-            <div id="currentBlindLabel" class="blind-line">10 / 20</div>
+            <div id="currentBlindLabel" class="blind-line blind-split"></div>
             <div id="currentDurationLabel" class="muted duration-text" style="margin-top: 10px;">Varighet: 15 min</div>
           </section>
 
@@ -790,7 +828,7 @@
 
           <section class="level-card panel">
             <div class="eyebrow">Neste level</div>
-            <div id="nextBlindLabel" class="blind-line">15 / 30</div>
+            <div id="nextBlindLabel" class="blind-line blind-split"></div>
             <div id="nextDurationLabel" class="muted duration-text" style="margin-top: 10px;">Varighet: 15 min</div>
           </section>
         </div>
@@ -1099,13 +1137,30 @@
       segments.forEach((seg, idx) => seg.classList.toggle('filled', idx < filledCount));
     }
 
+
+    function renderBlindSplit(sb, bb) {
+      return `
+        <div class="blind-column">
+          <div class="blind-label-small">Small Blind</div>
+          <div class="blind-number">${formatNumber(sb)}</div>
+        </div>
+
+        <div class="blind-divider">/</div>
+
+        <div class="blind-column">
+          <div class="blind-label-small">Big Blind</div>
+          <div class="blind-number">${formatNumber(bb)}</div>
+        </div>
+      `;
+    }
+
     function renderTimerScreen() {
       const current = getCurrentLevel();
       const next = getNextLevel();
       const bb = current.bb || 1;
-      els.currentBlindLabel.textContent = `${current.sb} / ${current.bb}`;
+      els.currentBlindLabel.innerHTML = renderBlindSplit(current.sb, current.bb);
       els.currentDurationLabel.textContent = `Varighet: ${current.duration} min`;
-      els.nextBlindLabel.textContent = `${next.sb} / ${next.bb}`;
+      els.nextBlindLabel.innerHTML = renderBlindSplit(next.sb, next.bb);
       els.nextDurationLabel.textContent = `Varighet: ${next.duration} min`;
       els.timerCenterLevel.textContent = `LEVEL ${current.level}`;
       els.timerValue.textContent = formatTime(state.timeRemainingSec);
@@ -1186,7 +1241,7 @@
     }
 
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && state.timerRunning) {
+      if (document.visibilityState === 'visible' && state.players.length > 0) {
         requestWakeLock();
       }
     });
