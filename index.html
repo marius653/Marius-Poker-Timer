@@ -1640,7 +1640,7 @@
     }
 
     function updateStartPauseLabel() {
-      els.startPauseBtn.textContent = state.timerRunning ? 'Ⅱ Pause' : '▶ Start';
+      els.startPauseBtn.textContent = state.timerRunning ? 'PAUSE ❚❚' : 'START ▶';
       els.startPauseBtn.className = `btn btn-main-play ${state.timerRunning ? 'btn-green' : 'btn-blue'}`;
     }
 
